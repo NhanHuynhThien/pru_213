@@ -7,6 +7,7 @@ public class PlayerController : MonoBehaviour
     public PlayerStats stats;
     public Transform cameraTransform;
     public CharacterController characterController;
+    public Animator animator;
 
     [Header("Movement Settings")]
     public float walkSpeed = 5f;
@@ -59,6 +60,9 @@ public class PlayerController : MonoBehaviour
         stats.Reset();
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+
+        if (animator == null)
+            animator = GetComponentInChildren<Animator>();
 
         walkSpeed = stats.moveSpeed;
         sprintSpeed = stats.sprintSpeed;
@@ -177,7 +181,9 @@ public class PlayerController : MonoBehaviour
             moveDirection = new Vector3(h, 0f, v) * speed;
         }
 
-        characterController.Move(moveDirection * Time.deltaTime);
+        // Apply movement (both horizontal and vertical) to avoid getting stuck on obstacles
+        Vector3 finalMove = moveDirection + velocity;
+        characterController.Move(finalMove * Time.deltaTime);
 
         if (h != 0f || v != 0f)
         {
@@ -188,6 +194,13 @@ public class PlayerController : MonoBehaviour
                 10f * Time.deltaTime
             );
         }
+
+        if (animator != null)
+        {
+            float targetSpeed = IsMoving ? 1.0f : 0.0f;
+            animator.SetFloat("Speed", targetSpeed, 0.1f, Time.deltaTime);
+            animator.speed = (IsMoving && isSprinting) ? 1.5f : 1.0f;
+        }
     }
 
     void HandleJump()
@@ -195,8 +208,8 @@ public class PlayerController : MonoBehaviour
         if (!isGrounded)
         {
             velocity.y += gravity * Time.deltaTime;
+            if (velocity.y < -25f) velocity.y = -25f; // Giới hạn vận tốc rơi để tránh lỗi xuyên tường
         }
-        characterController.Move(velocity * Time.deltaTime);
     }
 
     void Jump()
@@ -214,14 +227,16 @@ public class PlayerController : MonoBehaviour
 
         if (stats != null)
         {
-            Transform ap = attackPoint != null ? attackPoint : transform;
+            // Điều chỉnh tâm của vùng đánh: dời lên 1 chút (Vector3.up * 1f) và tiến tới trước mặt một nửa tầm đánh. 
+            // Như vậy sẽ không bị góc chết khi quái đứng quá sát nhân vật.
+            Vector3 attackPos = transform.position + transform.forward * (attackRange * 0.5f) + Vector3.up * 1f;
 
-            Collider[] hits = Physics.OverlapSphere(ap.position + ap.forward * attackRange * 0.5f, attackRadius);
+            Collider[] hits = Physics.OverlapSphere(attackPos, attackRadius);
             foreach (Collider hit in hits)
             {
                 if (hit.CompareTag("Enemy") || hit.CompareTag("Boss"))
                 {
-                    IDamageable dmg = hit.GetComponent<IDamageable>();
+                    IDamageable dmg = hit.GetComponentInParent<IDamageable>();
                     if (dmg != null)
                     {
                         float dmgVal = stats.EffectiveAttackDamage;
@@ -286,11 +301,9 @@ public class PlayerController : MonoBehaviour
 
     void OnDrawGizmosSelected()
     {
-        if (attackPoint != null)
-        {
-            Gizmos.color = Color.red;
-            Gizmos.DrawWireSphere(attackPoint.position + attackPoint.forward * attackRange * 0.5f, attackRadius);
-        }
+        Gizmos.color = Color.red;
+        Vector3 attackPos = transform.position + transform.forward * (attackRange * 0.5f) + Vector3.up * 1f;
+        Gizmos.DrawWireSphere(attackPos, attackRadius);
     }
 }
 
