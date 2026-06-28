@@ -5,8 +5,8 @@ using System.Collections;
 public class PlayerMovement : MonoBehaviour
 {
     [Header("Movement Settings")]
-    [SerializeField] private float _movementSpeed = 8f;
-    [SerializeField] private float _runMultiplier = 2f;
+    [SerializeField] private float _movementSpeed = 4f; // Giảm tốc độ đi bộ để dễ control hơn
+    [SerializeField] private float _runMultiplier = 1.5f; // Tốc độ chạy = 6f
     [SerializeField] private float _gravity = -15f;
     [SerializeField] private float _jumpHeight = 2f;
 
@@ -74,10 +74,12 @@ public class PlayerMovement : MonoBehaviour
         }
 
         // Apply gravity over time
-        _velocity.y += _gravity * Time.deltaTime;
-
-        // Move the player (vertical gravity and jump velocity)
-        _characterController.Move(_velocity * Time.deltaTime);
+        if (!_characterController.isGrounded)
+        {
+            _velocity.y += _gravity * Time.deltaTime;
+            if (_velocity.y < -25f) _velocity.y = -25f; // Giới hạn vận tốc rơi để không bị xuyên tường
+        }
+        // _characterController.Move(_velocity * Time.deltaTime);
     }
 
     private void HandleMovementAndRotation()
@@ -117,14 +119,23 @@ public class PlayerMovement : MonoBehaviour
 
         // Move the player (horizontal) - giảm tốc độ di chuyển khi đang vung kiếm
         float speedMultiplier = _isAttacking ? 0.2f : 1f;
-        _characterController.Move(move * currentSpeed * speedMultiplier * Time.deltaTime);
+        
+        // Gộp cả di chuyển ngang (move) và di chuyển dọc (_velocity) vào một lệnh Move duy nhất để tránh bị kẹt tường
+        Vector3 finalMove = (move * currentSpeed * speedMultiplier) + _velocity;
+        _characterController.Move(finalMove * Time.deltaTime);
 
         // Cập nhật hoạt ảnh di chuyển cho Animator
         if (_animator != null)
         {
             float moveInput = new Vector2(x, z).magnitude;
-            float targetSpeed = moveInput > 0.1f ? (Input.GetKey(KeyCode.LeftShift) ? 1.0f : 0.5f) : 0.0f;
+            bool isRunning = moveInput > 0.1f && Input.GetKey(KeyCode.LeftShift);
+            
+            // Set speed = 1 khi có di chuyển (để play anim Walk/Run chung)
+            float targetSpeed = moveInput > 0.1f ? 1.0f : 0.0f;
             _animator.SetFloat("Speed", targetSpeed, 0.1f, Time.deltaTime);
+            
+            // Tăng tốc độ phát anim khi chạy để phân biệt với đi bộ
+            _animator.speed = isRunning ? 1.5f : 1.0f;
         }
     }
 
@@ -152,7 +163,7 @@ public class PlayerMovement : MonoBehaviour
             if (col.gameObject == this.gameObject) continue;
 
             // Gây sát thương lên Boss hoặc Enemy có component IDamageable
-            IDamageable damageable = col.GetComponent<IDamageable>();
+            IDamageable damageable = col.GetComponentInParent<IDamageable>();
             if (damageable != null)
             {
                 try
