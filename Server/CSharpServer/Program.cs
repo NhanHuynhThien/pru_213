@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace LoaThanhServer
 {
+    // Trạng thái của người chơi
     public class PlayerState
     {
         public string username { get; set; } = "";
@@ -470,7 +471,7 @@ namespace LoaThanhServer
             var response = new
             {
                 action = won ? "REQUIRE_CONSECRATION" : "UPGRADE_FAILED",
-               payload = won
+                payload = won
     ? new
     {
         next_tier = state.current_tier,
