@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "mcp-unity": {
+      "command": "node",
+      "args": [
+        "d:/PRU213/UnityMCP/Server~/build/index.js"
+      ]
+    }
+  }
+}

@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e, type: 3}
+  m_Name: SkinBase_Tier4_ThanVuong
+  m_EditorClassIdentifier: 
+  ID: 4
+  SkinName: Than Vuong
+  Tier: 4
+  ModelPrefab: {fileID: 0}
+  BonusHealth: 250
+  BonusSpeed: 1.5
+  BonusDamage: 10
+  BonusDefense: 5
+  tierDescription: Thần Vương - Lớp giáp hoàng kim thần lực.
+  tierLore: Trang bị của Thần Vương, được ban phước bởi sức mạnh U Minh.
+  equipEffect: {fileID: 0}
+  armorColor: {r: 1, g: 0.85, b: 0.2, a: 1}

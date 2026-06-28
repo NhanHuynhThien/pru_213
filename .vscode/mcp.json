@@ -1,0 +1,13 @@
+{
+  "servers": {
+    "MCP-Unity": {
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        "E:\\PRU213\\pru213_game-dev-nhanHuynh\\UnityMCP\\Server~\\build\\index.js"
+      ],
+      "cwd": "E:\\PRU213\\pru213_game-dev-nhanHuynh"
+    }
+  },
+  "inputs": []
+}

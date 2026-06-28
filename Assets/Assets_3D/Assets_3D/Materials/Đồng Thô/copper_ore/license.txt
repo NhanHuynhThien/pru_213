@@ -1,0 +1,11 @@
+Model Information:
+* title:	Copper Ore
+* source:	https://sketchfab.com/3d-models/copper-ore-a9918d7572e8490ebd461e019ed03757
+* author:	NaRoCreations (https://sketchfab.com/NaRoCreations)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Copper Ore" (https://sketchfab.com/3d-models/copper-ore-a9918d7572e8490ebd461e019ed03757) by NaRoCreations (https://sketchfab.com/NaRoCreations) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

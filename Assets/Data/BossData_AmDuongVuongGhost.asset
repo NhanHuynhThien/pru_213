@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4063673ab2960ea4d8eee0b38478f191, type: 3}
+  m_Name: BossData_AmDuongVuongGhost
+  m_EditorClassIdentifier: 
+  bossName: Bong Than Am Duong
+  bossID: 3
+  requiredTier: 3
+  maxHealth: 1200
+  moveSpeed: 3.5
+  attackDamage: 50
+  attackRange: 4
+  attackCooldown: 1.5
+  defense: 20
+  totalPhases: 3
+  phaseHealthThresholds:
+  - 0.66
+  - 0.33
+  specialAbilityCooldown: 5
+  dashSpeed: 16
+  aoeRadius: 7
+  aoeDamage: 70
+  loreDescription: Bong Than Am Duong, bong than cua mot am vuong.
+  bossQuote: "I shall rise from the shadows!"
+  modelPrefab: {fileID: 0}
+  phaseTransitionEffect: {fileID: 0}
+  deathEffect: {fileID: 0}
+  spawnEffect: {fileID: 0}

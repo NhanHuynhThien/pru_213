@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 100fcd3d45db92a4e979fdfedcf31c88
+timeCreated: 1514840779
+licenseType: Store
+NativeFormatImporter:
+  mainObjectFileID: 25800000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 15393
+  packageName: WideBlade Simple Sword
+  packageVersion: 1.3.2
+  assetPath: Assets/_DLNK/Wideblade Sword/Demo/SimpleSword/LightingData.asset
+  uploadId: 490112

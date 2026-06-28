@@ -1,0 +1,233 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &100001
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 400001}
+  - component: {fileID: 13600001}
+  - component: {fileID: 11400001}
+  - component: {fileID: 11400002}
+  - component: {fileID: 11400003}
+  - component: {fileID: 11400004}
+  - component: {fileID: 11400005}
+  - component: {fileID: 19500001}
+  m_Layer: 9
+  m_Name: Player
+  m_TagString: Player
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &400001
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100001}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 1, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 400002}
+  - {fileID: 400003}
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!4 &400002
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 1.5, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 400001}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!4 &400003
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 1, z: 1}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 400001}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!136 &13600001
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100001}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.4
+  m_Height: 1.8
+  m_Direction: 1
+  m_Center: {x: 0, y: 0.9, z: 0}
+--- !u!114 &11400001
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e0872b8d6b7b24f4f9c2a8f4e7b8c3d1, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  stats: {fileID: 0}
+  cameraTransform: {fileID: 0}
+  characterController: {fileID: 13600001}
+  walkSpeed: 5
+  sprintSpeed: 8
+  jumpHeight: 2
+  gravity: -20
+  groundCheckDistance: 0.3
+  groundMask:
+    serializedVersion: 2
+    m_Bits: 256
+  mouseSensitivity: 100
+  maxLookUp: 80
+  maxLookDown: -80
+  attackPoint: {fileID: 400003}
+  attackRange: 2
+  attackRadius: 1
+--- !u!114 &11400002
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  stats: {fileID: 0}
+  controller: {fileID: 11400001}
+  animator: {fileID: 0}
+  currentHealth: 100
+  invincibilityTime: 0.5
+--- !u!114 &11400003
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f1e2d3c4b5a697886f7e8d9c0b1a2f3e, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  availableSkins: []
+  characterRoot: {fileID: 400001}
+  particleManager: {fileID: 0}
+  currentTier: 1
+--- !u!114 &11400004
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  currentTier: 1
+  tier1Color: {r: 0.5, g: 0.35, b: 0.2, a: 1}
+  tier1Emission: 0
+  tier2Color: {r: 0.72, g: 0.45, b: 0.2, a: 1}
+  tier2Emission: 0.3
+  tier2GlowPulse: 0.5
+  tier3Color: {r: 0.2, g: 0.6, b: 0.4, a: 1}
+  tier3Emission: 0.6
+  tier3Glow: {r: 0.3, g: 1, b: 0.6, a: 0.8}
+  tier3PulseSpeed: 2
+  tier4Color: {r: 1, g: 0.85, b: 0.2, a: 1}
+  tier4Emission: 1.2
+  tier4Glow: {r: 1, g: 0.9, b: 0.3, a: 1}
+  tier4SpiralSpeed: 3
+  tier2Particles: {fileID: 0}
+  tier3Particles: {fileID: 0}
+  tier4Particles: {fileID: 0}
+--- !u!114 &11400005
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  playerName: Cao Thuc
+  playerID: 1
+  currentTier: 1
+  tierName: Gap Cham
+  className: Nghe Nhan
+  maxHealth: 100
+  currentHealth: 100
+  moveSpeed: 5
+  sprintSpeed: 8
+  jumpForce: 8
+  attackDamage: 15
+  attackSpeed: 1
+  criticalChance: 0.05
+  criticalMultiplier: 1.5
+  defense: 5
+  stamina: 100
+  maxStamina: 100
+  staminaRegen: 10
+  copperCount: 0
+  tinCount: 0
+  bronzeIngot: 0
+  turtleShell: 0
+--- !u!195 &19500001
+NavMeshAgent:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100001}
+  m_Enabled: 0
+  m_AgentTypeID: 0
+  m_Radius: 0.4
+  m_Speed: 5
+  m_Acceleration: 8
+  avoidancePriority: 50
+  m_AngularSpeed: 120
+  m_StoppingDistance: 0.2
+  m_AutoBraking: 1
+  m_AutoRepath: 1
+  m_Height: 1.8
+  m_BaseOffset: 0
+  m_WalkableMask: 4294967295
+  m_ObstacleAvoidanceType: 4

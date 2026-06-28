@@ -1,0 +1,174 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &100001
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 400001}
+  - component: {fileID: 8200001}
+  - component: {fileID: 8200002}
+  - component: {fileID: 8200003}
+  - component: {fileID: 11400001}
+  m_Layer: 0
+  m_Name: AudioManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &400001
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100001}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!82 &8200001
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100001}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 0}
+  m_Volume: 0.6
+  m_Pitch: 1
+  m_Loop: 1
+  m_Mute: 0
+  m_Spatialize: 0
+  m_SpatializePostEffects: 0
+  m_DopplerLevel: 1
+  m_MinDistance: 1
+  m_MaxDistance: 500
+  m_Cone2D: 0
+  m_OutsideRadius: 10000
+  m_UseCustomRolloff: 0
+  m_RolloffMode: 0
+  m_LogarithmicRolloff: 1
+  m_Spread: 0
+  m_PanLevel: 0
+  m_PanStereoMix: 0
+  m_SpatialBlend: 0
+  m_ReverbZoneMix: 1
+  m_Pause: 0
+  m_VelocityUpdateMode: 0
+--- !u!82 &8200002
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100001}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 0}
+  m_Volume: 0.8
+  m_Pitch: 1
+  m_Loop: 0
+  m_Mute: 0
+  m_Spatialize: 0
+  m_SpatializePostEffects: 0
+  m_DopplerLevel: 1
+  m_MinDistance: 1
+  m_MaxDistance: 500
+  m_Cone2D: 0
+  m_OutsideRadius: 10000
+  m_UseCustomRolloff: 0
+  m_RolloffMode: 0
+  m_LogarithmicRolloff: 1
+  m_Spread: 0
+  m_PanLevel: 0
+  m_PanStereoMix: 0
+  m_SpatialBlend: 0
+  m_ReverbZoneMix: 1
+  m_Pause: 0
+  m_VelocityUpdateMode: 0
+--- !u!82 &8200003
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100001}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 0}
+  m_Volume: 1
+  m_Pitch: 1
+  m_Loop: 0
+  m_Mute: 0
+  m_Spatialize: 0
+  m_SpatializePostEffects: 0
+  m_DopplerLevel: 1
+  m_MinDistance: 1
+  m_MaxDistance: 500
+  m_Cone2D: 0
+  m_OutsideRadius: 10000
+  m_UseCustomRolloff: 0
+  m_RolloffMode: 0
+  m_LogarithmicRolloff: 1
+  m_Spread: 0
+  m_PanLevel: 0
+  m_PanStereoMix: 0
+  m_SpatialBlend: 0
+  m_ReverbZoneMix: 1
+  m_Pause: 0
+  m_VelocityUpdateMode: 0
+--- !u!114 &11400001
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  musicSource: {fileID: 8200001}
+  sfxSource: {fileID: 8200002}
+  voiceSource: {fileID: 8200003}
+  musicVolume: 0.6
+  sfxVolume: 0.8
+  voiceVolume: 1
+  menuMusic: {fileID: 0}
+  battleMusicTier1: {fileID: 0}
+  battleMusicTier2: {fileID: 0}
+  battleMusicTier3: {fileID: 0}
+  battleMusicTier4: {fileID: 0}
+  bossMusic: {fileID: 0}
+  attackSFX: {fileID: 0}
+  hitSFX: {fileID: 0}
+  deathSFX: {fileID: 0}
+  pickupSFX: {fileID: 0}
+  upgradeSFX: {fileID: 0}
+  healSFX: {fileID: 0}
+  stepSFX: {fileID: 0}
+  jumpSFX: {fileID: 0}
+  bowDrawSFX: {fileID: 0}
+  arrowReleaseSFX: {fileID: 0}
+  bossSpawnSFX: {fileID: 0}
+  consecrationSFX: {fileID: 0}
+  uiClickSFX: {fileID: 0}
+  uiErrorSFX: {fileID: 0}
+  forestAmbient: {fileID: 0}
+  battleAmbient: {fileID: 0}
+  bossAmbient: {fileID: 0}

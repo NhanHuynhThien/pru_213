@@ -1,0 +1,44 @@
+D:\KỲ 7\PRU212\pru213_game\Server\CSharpServer\bin\Debug\net9.0\CSharpServer.exe
+D:\KỲ 7\PRU212\pru213_game\Server\CSharpServer\bin\Debug\net9.0\CSharpServer.deps.json
+D:\KỲ 7\PRU212\pru213_game\Server\CSharpServer\bin\Debug\net9.0\CSharpServer.runtimeconfig.json
+D:\KỲ 7\PRU212\pru213_game\Server\CSharpServer\bin\Debug\net9.0\CSharpServer.dll
+D:\KỲ 7\PRU212\pru213_game\Server\CSharpServer\bin\Debug\net9.0\CSharpServer.pdb
+D:\KỲ 7\PRU212\pru213_game\Server\CSharpServer\obj\Debug\net9.0\CSharpServer.GeneratedMSBuildEditorConfig.editorconfig
+D:\KỲ 7\PRU212\pru213_game\Server\CSharpServer\obj\Debug\net9.0\CSharpServer.AssemblyInfoInputs.cache
+D:\KỲ 7\PRU212\pru213_game\Server\CSharpServer\obj\Debug\net9.0\CSharpServer.AssemblyInfo.cs
+D:\KỲ 7\PRU212\pru213_game\Server\CSharpServer\obj\Debug\net9.0\CSharpServer.csproj.CoreCompileInputs.cache
+D:\KỲ 7\PRU212\pru213_game\Server\CSharpServer\obj\Debug\net9.0\CSharpServer.sourcelink.json
+D:\KỲ 7\PRU212\pru213_game\Server\CSharpServer\obj\Debug\net9.0\CSharpServer.dll
+D:\KỲ 7\PRU212\pru213_game\Server\CSharpServer\obj\Debug\net9.0\refint\CSharpServer.dll
+D:\KỲ 7\PRU212\pru213_game\Server\CSharpServer\obj\Debug\net9.0\CSharpServer.pdb
+D:\KỲ 7\PRU212\pru213_game\Server\CSharpServer\obj\Debug\net9.0\CSharpServer.genruntimeconfig.cache
+D:\KỲ 7\PRU212\pru213_game\Server\CSharpServer\obj\Debug\net9.0\ref\CSharpServer.dll
+D:\sem7\PRU212\pru213_game\Server\CSharpServer\bin\Debug\net9.0\CSharpServer.exe
+D:\sem7\PRU212\pru213_game\Server\CSharpServer\bin\Debug\net9.0\CSharpServer.deps.json
+D:\sem7\PRU212\pru213_game\Server\CSharpServer\bin\Debug\net9.0\CSharpServer.runtimeconfig.json
+D:\sem7\PRU212\pru213_game\Server\CSharpServer\bin\Debug\net9.0\CSharpServer.dll
+D:\sem7\PRU212\pru213_game\Server\CSharpServer\bin\Debug\net9.0\CSharpServer.pdb
+D:\sem7\PRU212\pru213_game\Server\CSharpServer\obj\Debug\net9.0\CSharpServer.GeneratedMSBuildEditorConfig.editorconfig
+D:\sem7\PRU212\pru213_game\Server\CSharpServer\obj\Debug\net9.0\CSharpServer.AssemblyInfoInputs.cache
+D:\sem7\PRU212\pru213_game\Server\CSharpServer\obj\Debug\net9.0\CSharpServer.AssemblyInfo.cs
+D:\sem7\PRU212\pru213_game\Server\CSharpServer\obj\Debug\net9.0\CSharpServer.csproj.CoreCompileInputs.cache
+D:\sem7\PRU212\pru213_game\Server\CSharpServer\obj\Debug\net9.0\CSharpServer.sourcelink.json
+D:\sem7\PRU212\pru213_game\Server\CSharpServer\obj\Debug\net9.0\CSharpServer.dll
+D:\sem7\PRU212\pru213_game\Server\CSharpServer\obj\Debug\net9.0\refint\CSharpServer.dll
+D:\sem7\PRU212\pru213_game\Server\CSharpServer\obj\Debug\net9.0\CSharpServer.pdb
+D:\sem7\PRU212\pru213_game\Server\CSharpServer\obj\Debug\net9.0\CSharpServer.genruntimeconfig.cache
+D:\sem7\PRU212\pru213_game\Server\CSharpServer\obj\Debug\net9.0\ref\CSharpServer.dll
+E:\PRU213\pru213_game-dev-nhanHuynh\Server\CSharpServer\obj\Debug\net9.0\CSharpServer.GeneratedMSBuildEditorConfig.editorconfig
+E:\PRU213\pru213_game-dev-nhanHuynh\Server\CSharpServer\obj\Debug\net9.0\CSharpServer.AssemblyInfoInputs.cache
+E:\PRU213\pru213_game-dev-nhanHuynh\Server\CSharpServer\obj\Debug\net9.0\CSharpServer.AssemblyInfo.cs
+E:\PRU213\pru213_game-dev-nhanHuynh\Server\CSharpServer\obj\Debug\net9.0\CSharpServer.csproj.CoreCompileInputs.cache
+E:\PRU213\pru213_game-dev-nhanHuynh\Server\CSharpServer\obj\Debug\net9.0\CSharpServer.dll
+E:\PRU213\pru213_game-dev-nhanHuynh\Server\CSharpServer\obj\Debug\net9.0\refint\CSharpServer.dll
+E:\PRU213\pru213_game-dev-nhanHuynh\Server\CSharpServer\obj\Debug\net9.0\CSharpServer.pdb
+E:\PRU213\pru213_game-dev-nhanHuynh\Server\CSharpServer\bin\Debug\net9.0\CSharpServer.exe
+E:\PRU213\pru213_game-dev-nhanHuynh\Server\CSharpServer\bin\Debug\net9.0\CSharpServer.deps.json
+E:\PRU213\pru213_game-dev-nhanHuynh\Server\CSharpServer\bin\Debug\net9.0\CSharpServer.runtimeconfig.json
+E:\PRU213\pru213_game-dev-nhanHuynh\Server\CSharpServer\bin\Debug\net9.0\CSharpServer.dll
+E:\PRU213\pru213_game-dev-nhanHuynh\Server\CSharpServer\bin\Debug\net9.0\CSharpServer.pdb
+E:\PRU213\pru213_game-dev-nhanHuynh\Server\CSharpServer\obj\Debug\net9.0\CSharpServer.genruntimeconfig.cache
+E:\PRU213\pru213_game-dev-nhanHuynh\Server\CSharpServer\obj\Debug\net9.0\ref\CSharpServer.dll

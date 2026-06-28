@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4063673ab2960ea4d8eee0b38478f191, type: 3}
+  m_Name: BossData_ThienLoc
+  m_EditorClassIdentifier: 
+  bossName: Thien Loc U Minh
+  bossID: 2
+  requiredTier: 2
+  maxHealth: 100
+  moveSpeed: 3
+  attackDamage: 35
+  attackRange: 3.5
+  attackCooldown: 1.8
+  defense: 0
+  totalPhases: 2
+  phaseHealthThresholds:
+  - 0.5
+  specialAbilityCooldown: 6
+  dashSpeed: 14
+  aoeRadius: 6
+  aoeDamage: 50
+  loreDescription: Thien Loc, mot thuc the manh me tu vung dat sau.
+  bossQuote: "The earth itself shall consume you!"
+  modelPrefab: {fileID: 0}
+  phaseTransitionEffect: {fileID: 0}
+  deathEffect: {fileID: 0}
+  spawnEffect: {fileID: 0}

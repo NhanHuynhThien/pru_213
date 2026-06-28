@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d, type: 3}
+  m_Name: BossData_VuThanMienTanSat
+  m_EditorClassIdentifier: 
+  bossName: Vu Than Mien Tan Sat
+  bossID: 4
+  requiredTier: 4
+  maxHealth: 250
+  moveSpeed: 4
+  attackDamage: 75
+  attackRange: 4.5
+  attackCooldown: 1.2
+  defense: 30
+  totalPhases: 3
+  phaseHealthThresholds:
+  - 0.66
+  - 0.33
+  specialAbilityCooldown: 4
+  dashSpeed: 18
+  aoeRadius: 8
+  aoeDamage: 100
+  loreDescription: Vu Than Mien Tan Sat, vong chu cuoi cung cua U Minh.
+  bossQuote: "All shall perish in eternal darkness!"
+  modelPrefab: {fileID: 0}
+  phaseTransitionEffect: {fileID: 0}
+  deathEffect: {fileID: 0}
+  spawnEffect: {fileID: 0}
