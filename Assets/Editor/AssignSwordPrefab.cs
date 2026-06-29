@@ -164,8 +164,8 @@ public class AssignSwordPrefab : EditorWindow
             SerializedProperty offsetProp = so.FindProperty("_swordOffset");
             SerializedProperty rotProp = so.FindProperty("_swordRotation");
             SerializedProperty scaleProp = so.FindProperty("_swordScale");
-            if (offsetProp != null) offsetProp.vector3Value = new Vector3(-0.06f, 0.05f, 0.02f);
-            if (rotProp != null) rotProp.vector3Value = new Vector3(80f, 0f, 0f);
+            if (offsetProp != null) offsetProp.vector3Value = new Vector3(0.03f, 0.102f, 0.062f);
+            if (rotProp != null) rotProp.vector3Value = new Vector3(15.362f, -277.364f, -215.845f);
             if (scaleProp != null) scaleProp.vector3Value = new Vector3(0.2f, 0.2f, 0.2f);
             so.ApplyModifiedProperties();
 
@@ -361,8 +361,8 @@ public class AssignSwordPrefab : EditorWindow
                         loot.itemName = "Stylized Wooden Sword";
                         loot.isWeapon = true;
                         loot.weaponPrefab = swordPrefab;
-                        loot.equipOffset = new Vector3(-0.06f, 0.05f, 0.02f);
-                        loot.equipRotation = new Vector3(80f, 0f, 0f);
+                        loot.equipOffset = new Vector3(0.03f, 0.102f, 0.062f);
+                        loot.equipRotation = new Vector3(15.362f, -277.364f, -215.845f);
                         loot.equipScale = new Vector3(0.2f, 0.2f, 0.2f);
                         loot.startImmediately = true;
                         

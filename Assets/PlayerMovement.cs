@@ -16,8 +16,8 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float _attackRange = 2f;
     [SerializeField] private float _attackRadius = 1.2f;
     [SerializeField] private float _attackCooldown = 0.8f;
-    [SerializeField] private Vector3 _swordOffset = new Vector3(-0.06f, 0.05f, 0.02f); // Tinh chỉnh vị trí kiếm trong tay
-    [SerializeField] private Vector3 _swordRotation = new Vector3(80f, 0f, 0f); // Tinh chỉnh góc xoay kiếm trong tay
+    [SerializeField] private Vector3 _swordOffset = new Vector3(0.03f, 0.102f, 0.062f); // Tinh chỉnh vị trí kiếm trong tay
+    [SerializeField] private Vector3 _swordRotation = new Vector3(15.362f, -277.364f, -215.845f); // Tinh chỉnh góc xoay kiếm trong tay
     [SerializeField] private Vector3 _swordScale = new Vector3(0.2f, 0.2f, 0.2f); // Tinh chỉnh scale kiếm trong tay
 
     private CharacterController _characterController;
@@ -28,6 +28,7 @@ public class PlayerMovement : MonoBehaviour
     private bool _hasSword = false;
     private bool _isAttacking = false;
     private float _attackCooldownTimer = 0f;
+    private bool _wasUIOpenLastFrame = false;
 
     public bool HasSword => _hasSword;
     public string EquippedSwordName => _equippedSword != null ? _equippedSword.name.Replace("(Clone)", "").Trim() : "Không có";
@@ -53,8 +54,25 @@ public class PlayerMovement : MonoBehaviour
             _velocity.y = -2f; // Snaps the character to the ground
         }
 
+        // Kiểm tra xem chuột có đang tương tác với UI hoặc UI đang mở không
+        bool isPointerOverUI = UnityEngine.EventSystems.EventSystem.current != null && 
+                               UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject();
+        bool isCursorUnlocked = Cursor.lockState != CursorLockMode.Locked;
+        bool isUIOpen = (InventoryUI.Instance != null && InventoryUI.Instance.IsOpen) ||
+                        (BlacksmithUI.Instance != null && BlacksmithUI.Instance.IsOpen) ||
+                        (UIManager.Instance != null && (
+                            (UIManager.Instance.pausePanel != null && UIManager.Instance.pausePanel.activeSelf) ||
+                            (UIManager.Instance.upgradePanel != null && UIManager.Instance.upgradePanel.activeSelf) ||
+                            (UIManager.Instance.gameOverPanel != null && UIManager.Instance.gameOverPanel.activeSelf) ||
+                            (UIManager.Instance.victoryPanel != null && UIManager.Instance.victoryPanel.activeSelf) ||
+                            (UIManager.Instance.characterStatsPanel != null && UIManager.Instance.characterStatsPanel.activeSelf)
+                        ));
+
+        bool blockAttack = isPointerOverUI || isCursorUnlocked || isUIOpen || _wasUIOpenLastFrame;
+        _wasUIOpenLastFrame = isCursorUnlocked || isUIOpen;
+
         // Đòn đánh (Chuột trái hoặc phím F)
-        if ((Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.F)) && !_isAttacking && _attackCooldownTimer <= 0f)
+        if (!blockAttack && (Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.F)) && !_isAttacking && _attackCooldownTimer <= 0f)
         {
             if (_hasSword)
             {
