@@ -18,6 +18,7 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float _attackCooldown = 0.8f;
     [SerializeField] private Vector3 _swordOffset = new Vector3(-0.06f, 0.05f, 0.02f); // Tinh chỉnh vị trí kiếm trong tay
     [SerializeField] private Vector3 _swordRotation = new Vector3(80f, 0f, 0f); // Tinh chỉnh góc xoay kiếm trong tay
+    [SerializeField] private Vector3 _swordScale = new Vector3(0.2f, 0.2f, 0.2f); // Tinh chỉnh scale kiếm trong tay
 
     private CharacterController _characterController;
     private Animator _animator;
@@ -35,6 +36,7 @@ public class PlayerMovement : MonoBehaviour
     {
         _characterController = GetComponent<CharacterController>();
         _animator = GetComponentInChildren<Animator>();
+        EquipWeapon();
     }
 
     private void Update()
@@ -262,7 +264,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void EquipWeapon()
     {
-        EquipWeapon(_swordPrefab, _swordOffset, _swordRotation, Vector3.one);
+        EquipWeapon(_swordPrefab, _swordOffset, _swordRotation, _swordScale);
     }
 
     public void EquipWeapon(GameObject weaponPrefabToEquip, Vector3 offset, Vector3 rotation, Vector3 scale)
