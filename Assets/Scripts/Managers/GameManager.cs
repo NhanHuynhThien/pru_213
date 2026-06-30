@@ -41,6 +41,12 @@ public class GameManager : MonoBehaviour
     {
         QualitySettings.vSyncCount = 0;
         Application.targetFrameRate = 60;
+
+        // Tự động chuyển sang trạng thái Playing nếu người chơi nhấn Play trực tiếp từ một scene bản đồ chơi (không phải MainMenu)
+        if (SceneManager.GetActiveScene().name != mainMenuScene && CurrentState == GameState.Menu)
+        {
+            ChangeState(GameState.Playing);
+        }
     }
 
     void Update()
