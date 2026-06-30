@@ -10,6 +10,7 @@ public class SetupPlayerMenu
         // 1. Create Player Capsule
         GameObject player = GameObject.CreatePrimitive(PrimitiveType.Capsule);
         player.name = "Player";
+        player.tag = "Player"; // Add Tag for portals and camera follow
         player.transform.position = new Vector3(0, 5f, 0); // Spawns slightly above ground at center
         player.transform.localScale = new Vector3(1, 1, 1);
         player.layer = LayerMask.NameToLayer("Default");

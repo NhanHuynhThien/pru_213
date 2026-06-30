@@ -4,5 +4,11 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Scene/Rung_Hac_Am.unity
+    guid: 0010411e66a9b1440bdcdb0511f4d9d4
+  - enabled: 1
+    path: Assets/Scene/CoLoa_Forest_Map.unity
+    guid: 0f91e3057c7a98a429e2aa8a7d3e432f
   m_configObjects: {}

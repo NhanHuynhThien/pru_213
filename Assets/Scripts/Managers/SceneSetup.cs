@@ -76,36 +76,63 @@ public class SceneSetup : MonoBehaviour
 
     void SetupPlayer()
     {
-        GameObject player = null;
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        if (player != null)
+        {
+            Debug.Log("[SceneSetup] Player already exists in scene. Reusing.");
+            
+            // Setup camera for existing player
+            CameraController cam = Camera.main?.GetComponent<CameraController>();
+            if (cam != null)
+            {
+                cam.playerTransform = player.transform;
+            }
+            else if (Camera.main != null)
+            {
+                CameraController newCam = Camera.main.gameObject.GetComponent<CameraController>();
+                if (newCam == null)
+                {
+                    newCam = Camera.main.gameObject.AddComponent<CameraController>();
+                }
+                newCam.playerTransform = player.transform;
+            }
+
+            UpgradeSystem us = FindObjectOfType<UpgradeSystem>();
+            if (us != null)
+            {
+                us.skinManager = player.GetComponent<SkinManager>();
+            }
+            return;
+        }
+
         if (playerPrefab == null)
         {
-            player = GameObject.FindGameObjectWithTag("Player");
-            if (player == null)
-            {
-                Debug.LogWarning("[SceneSetup] Khong tim thay Player!");
-            }
+            Debug.LogWarning("[SceneSetup] Khong tim thay Player Prefab!");
             return;
         }
 
         Vector3 spawnPos = playerSpawnPoint != null ? playerSpawnPoint.position : new Vector3(0f, 1f, 0f);
         player = Instantiate(playerPrefab, spawnPos, Quaternion.identity);
 
-        CameraController cam = Camera.main?.GetComponent<CameraController>();
-        if (cam != null)
+        CameraController camFollow = Camera.main?.GetComponent<CameraController>();
+        if (camFollow != null)
         {
-            cam.playerTransform = player.transform;
+            camFollow.playerTransform = player.transform;
         }
         else if (Camera.main != null)
         {
-            Camera camComp = Camera.main.gameObject.AddComponent<Camera>();
-            CameraController newCam = Camera.main.gameObject.AddComponent<CameraController>();
+            CameraController newCam = Camera.main.gameObject.GetComponent<CameraController>();
+            if (newCam == null)
+            {
+                newCam = Camera.main.gameObject.AddComponent<CameraController>();
+            }
             newCam.playerTransform = player.transform;
         }
 
-        UpgradeSystem us = FindObjectOfType<UpgradeSystem>();
-        if (us != null)
+        UpgradeSystem upgradeSys = FindObjectOfType<UpgradeSystem>();
+        if (upgradeSys != null)
         {
-            us.skinManager = player.GetComponent<SkinManager>();
+            upgradeSys.skinManager = player.GetComponent<SkinManager>();
         }
     }
 

@@ -50,6 +50,10 @@ public class BuildWorldPolishMenu
             }
 
             TerrainData tData = terrain.terrainData;
+            if (tData.detailResolution == 0)
+            {
+                tData.SetDetailResolution(1024, 16);
+            }
 
             // Load Grass Texture
             string[] grassGuids = AssetDatabase.FindAssets("Grass_01 t:Texture2D");
