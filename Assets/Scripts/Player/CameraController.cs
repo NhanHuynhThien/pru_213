@@ -57,14 +57,21 @@ public class CameraController : MonoBehaviour
         // Tự động khóa chuột lại khi click chuột vào màn hình chơi (giúp tránh việc chuột bay ra ngoài màn hình editor)
         if (Input.GetMouseButtonDown(0))
         {
-            bool isInventoryOpen = InventoryUI.Instance != null && InventoryUI.Instance.IsOpen;
-            bool isBlacksmithOpen = BlacksmithUI.Instance != null && BlacksmithUI.Instance.IsOpen;
-            bool isPauseOpen = UIManager.Instance != null && UIManager.Instance.pausePanel != null && UIManager.Instance.pausePanel.activeSelf;
-            
-            if (!isInventoryOpen && !isBlacksmithOpen && !isPauseOpen)
+            bool isOverUI = UnityEngine.EventSystems.EventSystem.current != null &&
+                            UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject();
+
+            if (!isOverUI)
             {
-                Cursor.lockState = CursorLockMode.Locked;
-                Cursor.visible = false;
+                bool isInventoryOpen = InventoryUI.Instance != null && InventoryUI.Instance.IsOpen;
+                bool isBlacksmithOpen = BlacksmithUI.Instance != null && BlacksmithUI.Instance.IsOpen;
+                bool isPauseOpen = UIManager.Instance != null && UIManager.Instance.pausePanel != null && UIManager.Instance.pausePanel.activeSelf;
+                bool isStatsOpen = UIManager.Instance != null && UIManager.Instance.characterStatsPanel != null && UIManager.Instance.characterStatsPanel.activeSelf;
+                
+                if (!isInventoryOpen && !isBlacksmithOpen && !isPauseOpen && !isStatsOpen)
+                {
+                    Cursor.lockState = CursorLockMode.Locked;
+                    Cursor.visible = false;
+                }
             }
         }
 

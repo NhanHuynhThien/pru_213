@@ -96,13 +96,17 @@ public class AssignSwordPrefab : EditorWindow
             return;
         }
 
-        // 3. Tìm asset Wideblade_Sword prefab
-        string prefabPath = "Assets/_DLNK/Wideblade Sword/[PREFABS]/Wideblade_Sword.prefab";
+        // 3. Tìm asset stylized_wooden_sword model
+        string prefabPath = "Assets/Assets_3D/Assets_3D/Weapons/Kiếm Gỗ/stylized_wooden_sword.glb";
         GameObject swordPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
         if (swordPrefab == null)
         {
             // Thử tìm kiếm trong AssetDatabase bằng tên
-            string[] guids = AssetDatabase.FindAssets("Wideblade_Sword t:Prefab");
+            string[] guids = AssetDatabase.FindAssets("stylized_wooden_sword t:Model");
+            if (guids.Length == 0)
+            {
+                guids = AssetDatabase.FindAssets("stylized_wooden_sword t:Prefab");
+            }
             if (guids.Length > 0)
             {
                 string foundPath = AssetDatabase.GUIDToAssetPath(guids[0]);
@@ -112,7 +116,7 @@ public class AssignSwordPrefab : EditorWindow
 
         if (swordPrefab == null)
         {
-            Debug.LogError("[Tools] Không tìm thấy file prefab Wideblade_Sword trong Assets!");
+            Debug.LogError("[Tools] Không tìm thấy file model/prefab stylized_wooden_sword trong Assets!");
             return;
         }
 
@@ -156,11 +160,13 @@ public class AssignSwordPrefab : EditorWindow
                 EditorUtility.SetDirty(cameraController);
             }
 
-            // 7. Gán vị trí và góc xoay mặc định chuẩn cho Kiếm cầm trên tay
+            // 7. Gán vị trí, góc xoay và tỉ lệ scale mặc định chuẩn cho Kiếm cầm trên tay
             SerializedProperty offsetProp = so.FindProperty("_swordOffset");
             SerializedProperty rotProp = so.FindProperty("_swordRotation");
-            if (offsetProp != null) offsetProp.vector3Value = new Vector3(-0.06f, 0.05f, 0.02f);
-            if (rotProp != null) rotProp.vector3Value = new Vector3(80f, 0f, 0f);
+            SerializedProperty scaleProp = so.FindProperty("_swordScale");
+            if (offsetProp != null) offsetProp.vector3Value = new Vector3(0.03f, 0.102f, 0.062f);
+            if (rotProp != null) rotProp.vector3Value = new Vector3(15.362f, -277.364f, -215.845f);
+            if (scaleProp != null) scaleProp.vector3Value = new Vector3(0.2f, 0.2f, 0.2f);
             so.ApplyModifiedProperties();
 
             // 7.5. Cấu hình Boss Sói trong Scene để có thể nhận sát thương và tấn công
@@ -339,8 +345,8 @@ public class AssignSwordPrefab : EditorWindow
                     if (EditorUtility.IsPersistent(go)) continue;
                     
                     string nameLower = go.name.ToLower();
-                    // Nhận diện kiếm gỗ (Wideblade Sword) qua tên "base_low" hoặc "wideblade" hoặc "sword" (nhưng bỏ qua người chơi/quái)
-                    if ((nameLower.Contains("base_low") || nameLower.Contains("wideblade_sword")) 
+                    // Nhận diện kiếm gỗ qua tên "base_low", "wideblade_sword" hoặc "stylized_wooden_sword"
+                    if ((nameLower.Contains("base_low") || nameLower.Contains("wideblade_sword") || nameLower.Contains("stylized_wooden_sword")) 
                         && !go.CompareTag("Player") 
                         && !nameLower.Contains("wolf") 
                         && !nameLower.Contains("linh thú")
@@ -352,12 +358,12 @@ public class AssignSwordPrefab : EditorWindow
                             loot = go.AddComponent<LootItem>();
                         }
                         
-                        loot.itemName = "Wideblade Sword";
+                        loot.itemName = "Stylized Wooden Sword";
                         loot.isWeapon = true;
                         loot.weaponPrefab = swordPrefab;
-                        loot.equipOffset = new Vector3(-0.06f, 0.05f, 0.02f);
-                        loot.equipRotation = new Vector3(80f, 0f, 0f);
-                        loot.equipScale = Vector3.one;
+                        loot.equipOffset = new Vector3(0.03f, 0.102f, 0.062f);
+                        loot.equipRotation = new Vector3(15.362f, -277.364f, -215.845f);
+                        loot.equipScale = new Vector3(0.2f, 0.2f, 0.2f);
                         loot.startImmediately = true;
                         
                         // Đảm bảo có BoxCollider hoặc MeshCollider là Trigger

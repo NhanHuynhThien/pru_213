@@ -38,6 +38,7 @@ public class PlayerController : MonoBehaviour
     private float attackTimer = 0f;
     private float summonCooldown = 0f;
     private const float SUMMON_COOLDOWN = 5f;
+    private bool wasUIOpenLastFrame = false;
 
     public bool IsMoving { get; private set; }
     public bool IsGrounded => isGrounded;
@@ -76,27 +77,40 @@ public class PlayerController : MonoBehaviour
         HandleJump();
         HandleAttackCooldown();
 
+        bool isUIOpen = (InventoryUI.Instance != null && InventoryUI.Instance.IsOpen) ||
+                        (BlacksmithUI.Instance != null && BlacksmithUI.Instance.IsOpen) ||
+                        (UIManager.Instance != null && (
+                            (UIManager.Instance.pausePanel != null && UIManager.Instance.pausePanel.activeSelf) ||
+                            (UIManager.Instance.upgradePanel != null && UIManager.Instance.upgradePanel.activeSelf) ||
+                            (UIManager.Instance.gameOverPanel != null && UIManager.Instance.gameOverPanel.activeSelf) ||
+                            (UIManager.Instance.victoryPanel != null && UIManager.Instance.victoryPanel.activeSelf) ||
+                            (UIManager.Instance.characterStatsPanel != null && UIManager.Instance.characterStatsPanel.activeSelf)
+                        ));
+        bool isCursorUnlocked = Cursor.lockState != CursorLockMode.Locked;
+        bool blockInput = isUIOpen || isCursorUnlocked || wasUIOpenLastFrame;
+        wasUIOpenLastFrame = isUIOpen || isCursorUnlocked;
+
         if (isAttacking && attackTimer <= 0f)
         {
             isAttacking = false;
         }
 
-        if (Input.GetKeyDown(KeyCode.F) && !isAttacking && attackTimer <= 0f)
+        if (!blockInput && Input.GetKeyDown(KeyCode.F) && !isAttacking && attackTimer <= 0f)
         {
             Attack();
         }
 
-        if (Input.GetKeyDown(KeyCode.Space) && isGrounded && !isJumping)
+        if (!blockInput && Input.GetKeyDown(KeyCode.Space) && isGrounded && !isJumping)
         {
             Jump();
         }
 
-        if (Input.GetKeyDown(KeyCode.LeftShift) && isGrounded)
+        if (!blockInput && Input.GetKeyDown(KeyCode.LeftShift) && isGrounded)
         {
             if (stats != null && stats.stamina > 5f)
                 isSprinting = true;
         }
-        if (Input.GetKeyUp(KeyCode.LeftShift))
+        if (blockInput || Input.GetKeyUp(KeyCode.LeftShift))
         {
             isSprinting = false;
         }
@@ -111,7 +125,7 @@ public class PlayerController : MonoBehaviour
             }
         }
 
-        if (Input.GetKeyDown(KeyCode.Q) && stats != null && stats.canSummonArrows && summonCooldown <= 0f)
+        if (!blockInput && Input.GetKeyDown(KeyCode.Q) && stats != null && stats.canSummonArrows && summonCooldown <= 0f)
         {
             SummonArrows();
         }
@@ -119,7 +133,7 @@ public class PlayerController : MonoBehaviour
         if (summonCooldown > 0f)
             summonCooldown -= Time.deltaTime;
 
-        if (Input.GetKeyDown(KeyCode.U))
+        if (!blockInput && Input.GetKeyDown(KeyCode.U))
         {
             UpgradeSystem us = UpgradeSystem.Instance;
             if (us != null)
@@ -128,7 +142,52 @@ public class PlayerController : MonoBehaviour
             }
         }
 
-        if (Input.GetMouseButtonDown(1))
+        bool otherPanelsOpen = (InventoryUI.Instance != null && InventoryUI.Instance.IsOpen) ||
+                               (BlacksmithUI.Instance != null && BlacksmithUI.Instance.IsOpen) ||
+                               (UIManager.Instance != null && (
+                                   (UIManager.Instance.pausePanel != null && UIManager.Instance.pausePanel.activeSelf) ||
+                                   (UIManager.Instance.upgradePanel != null && UIManager.Instance.upgradePanel.activeSelf) ||
+                                   (UIManager.Instance.gameOverPanel != null && UIManager.Instance.gameOverPanel.activeSelf) ||
+                                   (UIManager.Instance.victoryPanel != null && UIManager.Instance.victoryPanel.activeSelf)
+                               ));
+
+        if (!otherPanelsOpen && Input.GetKeyDown(KeyCode.C))
+        {
+            if (UIManager.Instance != null)
+            {
+                UIManager.Instance.ToggleStatsPanel();
+            }
+        }
+
+        // Cho phép nhấn phím LeftAlt (hoặc Tab) để tự do hiện/ẩn con chuột trong khi chơi
+        if (Input.GetKeyDown(KeyCode.LeftAlt) || Input.GetKeyDown(KeyCode.Tab))
+        {
+            if (Cursor.lockState == CursorLockMode.Locked)
+            {
+                Cursor.lockState = CursorLockMode.None;
+                Cursor.visible = true;
+            }
+            else
+            {
+                // Chỉ khóa lại nếu không có bất kỳ bảng UI nào đang mở
+                bool uiOpen = (InventoryUI.Instance != null && InventoryUI.Instance.IsOpen) ||
+                              (BlacksmithUI.Instance != null && BlacksmithUI.Instance.IsOpen) ||
+                              (UIManager.Instance != null && (
+                                  (UIManager.Instance.pausePanel != null && UIManager.Instance.pausePanel.activeSelf) ||
+                                  (UIManager.Instance.upgradePanel != null && UIManager.Instance.upgradePanel.activeSelf) ||
+                                  (UIManager.Instance.gameOverPanel != null && UIManager.Instance.gameOverPanel.activeSelf) ||
+                                  (UIManager.Instance.victoryPanel != null && UIManager.Instance.victoryPanel.activeSelf) ||
+                                  (UIManager.Instance.characterStatsPanel != null && UIManager.Instance.characterStatsPanel.activeSelf)
+                              ));
+                if (!uiOpen)
+                {
+                    Cursor.lockState = CursorLockMode.Locked;
+                    Cursor.visible = false;
+                }
+            }
+        }
+
+        if (!blockInput && Input.GetMouseButtonDown(1))
         {
             Camera cam = Camera.main;
             if (cam != null)
@@ -159,11 +218,23 @@ public class PlayerController : MonoBehaviour
 
     void HandleMovement()
     {
-        float h = Input.GetAxisRaw("Horizontal");
-        float v = Input.GetAxisRaw("Vertical");
+        bool isUIOpen = (InventoryUI.Instance != null && InventoryUI.Instance.IsOpen) ||
+                        (BlacksmithUI.Instance != null && BlacksmithUI.Instance.IsOpen) ||
+                        (UIManager.Instance != null && (
+                            (UIManager.Instance.pausePanel != null && UIManager.Instance.pausePanel.activeSelf) ||
+                            (UIManager.Instance.upgradePanel != null && UIManager.Instance.upgradePanel.activeSelf) ||
+                            (UIManager.Instance.gameOverPanel != null && UIManager.Instance.gameOverPanel.activeSelf) ||
+                            (UIManager.Instance.victoryPanel != null && UIManager.Instance.victoryPanel.activeSelf) ||
+                            (UIManager.Instance.characterStatsPanel != null && UIManager.Instance.characterStatsPanel.activeSelf)
+                        ));
+        bool isCursorUnlocked = Cursor.lockState != CursorLockMode.Locked;
+        bool blockInput = isUIOpen || isCursorUnlocked || wasUIOpenLastFrame;
+
+        float h = blockInput ? 0f : Input.GetAxisRaw("Horizontal");
+        float v = blockInput ? 0f : Input.GetAxisRaw("Vertical");
         IsMoving = Mathf.Abs(h) > 0.1f || Mathf.Abs(v) > 0.1f;
 
-        float speed = isSprinting ? sprintSpeed : walkSpeed;
+        float speed = (isSprinting && !blockInput) ? sprintSpeed : walkSpeed;
 
         if (cameraTransform != null)
         {
@@ -234,21 +305,21 @@ public class PlayerController : MonoBehaviour
             Collider[] hits = Physics.OverlapSphere(attackPos, attackRadius);
             foreach (Collider hit in hits)
             {
-                if (hit.CompareTag("Enemy") || hit.CompareTag("Boss"))
+                // Bỏ qua chính bản thân người chơi
+                if (hit.gameObject == gameObject) continue;
+
+                IDamageable dmg = hit.GetComponentInParent<IDamageable>();
+                if (dmg != null)
                 {
-                    IDamageable dmg = hit.GetComponentInParent<IDamageable>();
-                    if (dmg != null)
+                    float dmgVal = stats.EffectiveAttackDamage;
+                    bool isCrit = Random.value < stats.criticalChance;
+                    if (isCrit) dmgVal *= stats.criticalMultiplier;
+
+                    dmg.TakeDamage(Mathf.RoundToInt(dmgVal), isCrit);
+
+                    if (isCrit)
                     {
-                        float dmgVal = stats.EffectiveAttackDamage;
-                        bool isCrit = Random.value < stats.criticalChance;
-                        if (isCrit) dmgVal *= stats.criticalMultiplier;
-
-                        dmg.TakeDamage(Mathf.RoundToInt(dmgVal), isCrit);
-
-                        if (isCrit)
-                        {
-                            DamagePopup.Create(hit.transform.position + Vector3.up, (int)dmgVal, true);
-                        }
+                        DamagePopup.Create(hit.transform.position + Vector3.up, (int)dmgVal, true);
                     }
                 }
             }

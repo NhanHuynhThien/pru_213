@@ -44,14 +44,110 @@ public class UIManager : MonoBehaviour
     public Image tierIcon;
     public TextMeshProUGUI tierNameText;
 
+    [Header("Character Stats Panel")]
+    public GameObject characterStatsPanel;
+    public TextMeshProUGUI statsLevelText;
+    public TextMeshProUGUI statsDamageText;
+    public TextMeshProUGUI statsDefenseText;
+    public TextMeshProUGUI statsHpText;
+    public TextMeshProUGUI statsStaminaText;
+
+    [Header("Pause & Settings Panel")]
+    public GameObject gearButton;
+    public Button tabSettingsBtn;
+    public Button tabControlsBtn;
+    public GameObject tabContentSettings;
+    public GameObject tabContentControls;
+    public UnityEngine.UI.Slider musicVolumeSlider;
+    public UnityEngine.UI.Slider sfxVolumeSlider;
+    public Button resumeButton;
+    public Button mainMenuButton;
+    public Button quitButton;
+
     void Awake()
     {
+        EnsureManagersAreActive();
+
         if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
             return;
         }
         Instance = this;
+    }
+
+    void EnsureManagersAreActive()
+    {
+        // 1. Tìm GameManager trong các root GameObject (kể cả bị ẩn)
+        GameObject gmGo = FindRootGameObject("GameManager");
+        if (gmGo != null)
+        {
+            if (!gmGo.activeSelf)
+            {
+                gmGo.SetActive(true);
+                Debug.Log("<color=green>[UIManager]</color> Đã tự động kích hoạt GameManager bị ẩn!");
+            }
+            GameManager gm = gmGo.GetComponent<GameManager>();
+            if (gm == null)
+            {
+                gm = gmGo.AddComponent<GameManager>();
+                Debug.Log("<color=green>[UIManager]</color> Tự động gắn thêm component GameManager bị thiếu!");
+            }
+        }
+
+        // 2. Tìm AudioManager
+        GameObject amGo = FindRootGameObject("AudioManager");
+        if (amGo != null)
+        {
+            if (!amGo.activeSelf)
+            {
+                amGo.SetActive(true);
+                Debug.Log("<color=green>[UIManager]</color> Đã tự động kích hoạt AudioManager bị ẩn!");
+            }
+            AudioManager am = amGo.GetComponent<AudioManager>();
+            if (am == null)
+            {
+                am = amGo.AddComponent<AudioManager>();
+                Debug.Log("<color=green>[UIManager]</color> Tự động gắn thêm component AudioManager bị thiếu!");
+            }
+        }
+
+        // 3. Tìm ParticleManager
+        GameObject pmGo = FindRootGameObject("ParticleManager");
+        if (pmGo != null)
+        {
+            if (!pmGo.activeSelf)
+            {
+                pmGo.SetActive(true);
+                Debug.Log("<color=green>[UIManager]</color> Đã tự động kích hoạt ParticleManager bị ẩn!");
+            }
+            ParticleManager pm = pmGo.GetComponent<ParticleManager>();
+            if (pm == null)
+            {
+                pm = pmGo.AddComponent<ParticleManager>();
+                Debug.Log("<color=green>[UIManager]</color> Tự động gắn thêm component ParticleManager bị thiếu!");
+            }
+        }
+    }
+
+    GameObject FindRootGameObject(string name)
+    {
+        UnityEngine.SceneManagement.Scene activeScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
+        foreach (GameObject rootObj in activeScene.GetRootGameObjects())
+        {
+            if (rootObj.name == name) return rootObj;
+        }
+        
+        // Tìm trong toàn bộ scene kể cả đối tượng ẩn
+        GameObject[] allObjects = Resources.FindObjectsOfTypeAll<GameObject>();
+        foreach (GameObject go in allObjects)
+        {
+            if (go.name == name && go.scene.isLoaded)
+            {
+                return go;
+            }
+        }
+        return null;
     }
 
     void Start()
@@ -67,6 +163,125 @@ public class UIManager : MonoBehaviour
         FindPlayerReferences();
         AutoFindUIReferences();
         EnsureBossHealthUIExists();
+        BindStatsPanelEvents();
+        BindPauseMenuEvents();
+    }
+
+    void BindPauseMenuEvents()
+    {
+        if (gearButton != null)
+        {
+            Button btn = gearButton.GetComponent<Button>();
+            if (btn == null) btn = gearButton.AddComponent<Button>();
+            btn.onClick.RemoveAllListeners();
+            btn.onClick.AddListener(() => {
+                Debug.Log($"[UIManager] Clicked MENU Button! GameManager.Instance != null: {GameManager.Instance != null}");
+                if (GameManager.Instance != null)
+                {
+                    Debug.Log($"[UIManager] Current GameState before toggle: {GameManager.Instance.CurrentState}");
+                    GameManager.Instance.TogglePause();
+                }
+            });
+        }
+
+        if (resumeButton != null)
+        {
+            resumeButton.onClick.RemoveAllListeners();
+            resumeButton.onClick.AddListener(ResumeGame);
+        }
+
+        if (pausePanel != null)
+        {
+            Transform closeBtnTrans = pausePanel.transform.Find("PauseMenu_Border/PauseMenu_Bg/Close_Button");
+            if (closeBtnTrans != null)
+            {
+                Button closeBtn = closeBtnTrans.GetComponent<Button>();
+                if (closeBtn != null)
+                {
+                    closeBtn.onClick.RemoveAllListeners();
+                    closeBtn.onClick.AddListener(ResumeGame);
+                }
+            }
+        }
+
+        if (mainMenuButton != null)
+        {
+            mainMenuButton.onClick.RemoveAllListeners();
+            mainMenuButton.onClick.AddListener(MainMenu);
+        }
+
+        if (quitButton != null)
+        {
+            quitButton.onClick.RemoveAllListeners();
+            quitButton.onClick.AddListener(QuitGame);
+        }
+
+        if (tabSettingsBtn != null)
+        {
+            tabSettingsBtn.onClick.RemoveAllListeners();
+            tabSettingsBtn.onClick.AddListener(ShowSettingsTab);
+        }
+
+        if (tabControlsBtn != null)
+        {
+            tabControlsBtn.onClick.RemoveAllListeners();
+            tabControlsBtn.onClick.AddListener(ShowControlsTab);
+        }
+
+        if (musicVolumeSlider != null && AudioManager.Instance != null)
+        {
+            musicVolumeSlider.value = AudioManager.Instance.musicVolume;
+            musicVolumeSlider.onValueChanged.RemoveAllListeners();
+            musicVolumeSlider.onValueChanged.AddListener((val) => {
+                AudioManager.Instance.SetMusicVolume(val);
+            });
+        }
+
+        if (sfxVolumeSlider != null && AudioManager.Instance != null)
+        {
+            sfxVolumeSlider.value = AudioManager.Instance.sfxVolume;
+            sfxVolumeSlider.onValueChanged.RemoveAllListeners();
+            sfxVolumeSlider.onValueChanged.AddListener((val) => {
+                AudioManager.Instance.SetSFXVolume(val);
+            });
+        }
+    }
+
+    public void ShowSettingsTab()
+    {
+        if (tabContentSettings != null) tabContentSettings.SetActive(true);
+        if (tabContentControls != null) tabContentControls.SetActive(false);
+    }
+
+    public void ShowControlsTab()
+    {
+        if (tabContentSettings != null) tabContentSettings.SetActive(false);
+        if (tabContentControls != null) tabContentControls.SetActive(true);
+    }
+
+    void BindStatsPanelEvents()
+    {
+        if (characterStatsPanel != null)
+        {
+            Button closeBtn = characterStatsPanel.GetComponentInChildren<Button>();
+            if (closeBtn != null)
+            {
+                closeBtn.onClick.RemoveAllListeners();
+                closeBtn.onClick.AddListener(ToggleStatsPanel);
+            }
+        }
+
+        if (HUDPanel != null)
+        {
+            Transform avatarTrans = HUDPanel.transform.Find("Avatar_Mask");
+            if (avatarTrans != null)
+            {
+                Button avatarBtn = avatarTrans.GetComponent<Button>();
+                if (avatarBtn == null) avatarBtn = avatarTrans.gameObject.AddComponent<Button>();
+                avatarBtn.onClick.RemoveAllListeners();
+                avatarBtn.onClick.AddListener(ToggleStatsPanel);
+            }
+        }
     }
 
     void Update()
@@ -95,24 +310,43 @@ public class UIManager : MonoBehaviour
 
     void HandleGameStateChanged(GameManager.GameState state)
     {
+        Debug.Log($"[UIManager] HandleGameStateChanged - Trạng thái mới: {state}. Bảng PausePanel bị null: {pausePanel == null}");
         HideAllPanels();
 
         switch (state)
         {
             case GameManager.GameState.Menu:
                 if (menuPanel != null) menuPanel.SetActive(true);
+                Cursor.lockState = CursorLockMode.None;
+                Cursor.visible = true;
                 break;
             case GameManager.GameState.Playing:
                 if (HUDPanel != null) HUDPanel.SetActive(true);
+                // Khóa chuột khi quay lại chơi
+                bool otherUIOpen = (InventoryUI.Instance != null && InventoryUI.Instance.IsOpen) ||
+                                   (BlacksmithUI.Instance != null && BlacksmithUI.Instance.IsOpen) ||
+                                   (characterStatsPanel != null && characterStatsPanel.activeSelf);
+                if (!otherUIOpen)
+                {
+                    Cursor.lockState = CursorLockMode.Locked;
+                    Cursor.visible = false;
+                }
                 break;
             case GameManager.GameState.Paused:
                 if (pausePanel != null) pausePanel.SetActive(true);
+                // Mở khóa chuột để tương tác với menu cài đặt
+                Cursor.lockState = CursorLockMode.None;
+                Cursor.visible = true;
                 break;
             case GameManager.GameState.GameOver:
                 if (gameOverPanel != null) gameOverPanel.SetActive(true);
+                Cursor.lockState = CursorLockMode.None;
+                Cursor.visible = true;
                 break;
             case GameManager.GameState.Victory:
                 if (victoryPanel != null) victoryPanel.SetActive(true);
+                Cursor.lockState = CursorLockMode.None;
+                Cursor.visible = true;
                 break;
         }
     }
@@ -147,8 +381,62 @@ public class UIManager : MonoBehaviour
             if (enemyCountText != null) enemyCountText.text = $"Kills: {enemySpawner.TotalKills}";
         }
 
-        if (timeText != null && GameManager.Instance != null)
-            timeText.text = GameManager.Instance.FormatTime(GameManager.Instance.gameTime);
+
+        if (characterStatsPanel != null && characterStatsPanel.activeSelf)
+        {
+            UpdateStatsPanel();
+        }
+    }
+
+    public void ToggleStatsPanel()
+    {
+        if (characterStatsPanel != null)
+        {
+            bool isActive = !characterStatsPanel.activeSelf;
+            characterStatsPanel.SetActive(isActive);
+            Debug.Log($"[UIManager] ToggleStatsPanel - Trạng thái bảng: {isActive}");
+            
+            if (isActive)
+            {
+                Cursor.lockState = CursorLockMode.None;
+                Cursor.visible = true;
+                UpdateStatsPanel();
+            }
+            else
+            {
+                // Chỉ khóa chuột nếu các UI chính khác cũng đang đóng
+                bool otherUIOpen = (InventoryUI.Instance != null && InventoryUI.Instance.IsOpen) ||
+                                   (BlacksmithUI.Instance != null && BlacksmithUI.Instance.IsOpen) ||
+                                   (pausePanel != null && pausePanel.activeSelf) ||
+                                   (upgradePanel != null && upgradePanel.activeSelf);
+                                   
+                if (!otherUIOpen)
+                {
+                    Cursor.lockState = CursorLockMode.Locked;
+                    Cursor.visible = false;
+                }
+            }
+        }
+        else
+        {
+            Debug.LogWarning("[UIManager] ToggleStatsPanel - characterStatsPanel đang là null!");
+        }
+    }
+
+    public void UpdateStatsPanel()
+    {
+        if (playerStats != null)
+        {
+            if (statsLevelText != null) statsLevelText.text = $"Cấp: {playerStats.currentTier} ({playerStats.tierName})";
+            if (statsDamageText != null) statsDamageText.text = $"Sát thương: {playerStats.EffectiveAttackDamage}";
+            if (statsDefenseText != null) statsDefenseText.text = $"Phòng thủ: {playerStats.EffectiveDefense}";
+            if (statsHpText != null)
+            {
+                float curHp = playerCombat != null ? playerCombat.currentHealth : playerStats.currentHealth;
+                statsHpText.text = $"Máu: {Mathf.CeilToInt(curHp)} / {playerStats.EffectiveMaxHealth}";
+            }
+            if (statsStaminaText != null) statsStaminaText.text = $"Thể lực: {Mathf.CeilToInt(playerStats.stamina)} / {playerStats.maxStamina}";
+        }
     }
 
     public void ShowUpgradePanel(string stepInfo, float progress)
