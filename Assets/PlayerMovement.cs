@@ -30,6 +30,12 @@ public class PlayerMovement : MonoBehaviour
     private float _attackCooldownTimer = 0f;
     private bool _wasUIOpenLastFrame = false;
 
+    // Cache the weapon settings to support model re-swapping (armor change)
+    private GameObject _currentWeaponPrefab;
+    private Vector3 _currentWeaponOffset;
+    private Vector3 _currentWeaponRotation;
+    private Vector3 _currentWeaponScale;
+
     public bool HasSword => _hasSword;
     public string EquippedSwordName => _equippedSword != null ? _equippedSword.name.Replace("(Clone)", "").Trim() : "Không có";
 
@@ -285,9 +291,23 @@ public class PlayerMovement : MonoBehaviour
         EquipWeapon(_swordPrefab, _swordOffset, _swordRotation, _swordScale);
     }
 
+    public void SetAnimator(Animator newAnim)
+    {
+        _animator = newAnim;
+        // Re-equip the weapon to attach it to the new hand bone
+        if (_hasSword && _currentWeaponPrefab != null)
+        {
+            EquipWeapon(_currentWeaponPrefab, _currentWeaponOffset, _currentWeaponRotation, _currentWeaponScale);
+        }
+    }
+
     public void EquipWeapon(GameObject weaponPrefabToEquip, Vector3 offset, Vector3 rotation, Vector3 scale)
     {
         _hasSword = true;
+        _currentWeaponPrefab = weaponPrefabToEquip;
+        _currentWeaponOffset = offset;
+        _currentWeaponRotation = rotation;
+        _currentWeaponScale = scale;
 
         if (weaponPrefabToEquip == null)
         {

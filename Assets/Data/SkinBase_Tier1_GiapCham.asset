@@ -15,12 +15,14 @@ MonoBehaviour:
   ID: 1
   SkinName: Gap Cham
   Tier: 1
-  ModelPrefab: {fileID: 0}
+  ModelPrefab: {fileID: 3219414011254026410, guid: 6ae1972952893304b826629f5f1b4335, type: 3}
   BonusHealth: 0
   BonusSpeed: 0
   BonusDamage: 0
   BonusDefense: 0
-  tierDescription: Giáp Chàm - Lớp giáp cơ bản từ da trâu.
-  tierLore: Giáp được làm từ da trâu U Minh, cung cấp lớp bảo vệ cơ bản.
+  tierDescription: "Gi\xE1p Ch\xE0m - L\u1EDBp gi\xE1p c\u01A1 b\u1EA3n t\u1EEB da
+    tr\xE2u."
+  tierLore: "Gi\xE1p \u0111\u01B0\u1EE3c l\xE0m t\u1EEB da tr\xE2u U Minh, cung c\u1EA5p
+    l\u1EDBp b\u1EA3o v\u1EC7 c\u01A1 b\u1EA3n."
   equipEffect: {fileID: 0}
   armorColor: {r: 0.5, g: 0.35, b: 0.2, a: 1}
