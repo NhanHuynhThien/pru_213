@@ -27,7 +27,7 @@ public class BossController : MonoBehaviour, IDamageable
     public float moveSpeed = 2.5f;
     public float chaseSpeed = 4f;
     public float attackRange = 3f;
-    public float detectionRange = 5f; // Tầm phát hiện người chơi để đuổi theo
+    public float detectionRange = 18f; // Tam phat hien Player de duoi theo.
     private Vector3 velocity;
     public float gravity = -15f;
 
@@ -54,6 +54,7 @@ public class BossController : MonoBehaviour, IDamageable
     private bool isInvincible = false;
     private float invincibilityTimer = 0f;
     private float animTimer = 0f;
+    private float targetSearchTimer = 0f;
 
     public event System.Action<BossController> OnBossDeath;
     public event System.Action<int> OnPhaseChanged;
@@ -79,6 +80,7 @@ public class BossController : MonoBehaviour, IDamageable
             moveSpeed = data.moveSpeed;
             chaseSpeed = data.moveSpeed * 1.3f;
             attackDamage = data.attackDamage;
+            attackRange = data.attackRange;
             attackCooldown = data.attackCooldown;
             dashSpeed = data.dashSpeed;
             aoeRadius = data.aoeRadius;
@@ -93,15 +95,37 @@ public class BossController : MonoBehaviour, IDamageable
             attackDamage = 15f;
         }
 
-        GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
-        if (playerObj != null) target = playerObj.transform;
+        FindPlayerTarget();
 
         StartCoroutine(SpawnSequence());
+    }
+
+    private void FindPlayerTarget()
+    {
+        GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+        if (playerObj != null)
+        {
+            target = playerObj.transform;
+            return;
+        }
+
+        PlayerCombat playerCombat = FindFirstObjectByType<PlayerCombat>();
+        if (playerCombat != null)
+        {
+            target = playerCombat.transform;
+        }
     }
 
     void Update()
     {
         if (isDead) return;
+
+        targetSearchTimer -= Time.deltaTime;
+        if (target == null || targetSearchTimer <= 0f)
+        {
+            FindPlayerTarget();
+            targetSearchTimer = 0.5f;
+        }
 
         if (invincibilityTimer > 0f)
         {
@@ -134,9 +158,16 @@ public class BossController : MonoBehaviour, IDamageable
                 break;
         }
 
-        if (currentState != BossState.Spawning && currentState != BossState.Dead && target != null)
+        bool canSwitchCombatState =
+            currentState != BossState.Spawning &&
+            currentState != BossState.Dead &&
+            currentState != BossState.Casting &&
+            currentState != BossState.Stunned &&
+            currentState != BossState.PhaseTransition;
+
+        if (canSwitchCombatState && target != null)
         {
-            float dist = Vector3.Distance(transform.position, target.position);
+            float dist = GetDistanceToTarget(target.position);
             if (dist <= attackRange && attackTimer <= 0f)
             {
                 ChangeState(BossState.Attacking);
@@ -213,6 +244,35 @@ public class BossController : MonoBehaviour, IDamageable
     void UpdateAttack()
     {
         if (animator != null) animator.SetFloat("Speed", 0f);
+
+        if (target == null)
+        {
+            ChangeState(BossState.Idle);
+            return;
+        }
+
+        Vector3 lookPosition = new Vector3(target.position.x, transform.position.y, target.position.z);
+        Vector3 direction = lookPosition - transform.position;
+        if (direction.sqrMagnitude > 0.001f)
+        {
+            transform.rotation = Quaternion.Slerp(
+                transform.rotation,
+                Quaternion.LookRotation(direction.normalized),
+                8f * Time.deltaTime
+            );
+        }
+
+        float dist = GetDistanceToTarget(target.position);
+        if (dist > attackRange * 1.25f)
+        {
+            ChangeState(BossState.Chasing);
+            return;
+        }
+
+        if (attackTimer <= 0f)
+        {
+            PerformAttack();
+        }
     }
 
     void PerformAttack()
@@ -220,14 +280,19 @@ public class BossController : MonoBehaviour, IDamageable
         if (target == null) return;
 
         PlayerCombat pc = target.GetComponent<PlayerCombat>();
+        if (pc == null) pc = target.GetComponentInParent<PlayerCombat>();
+        if (pc == null) pc = target.GetComponentInChildren<PlayerCombat>();
         if (pc != null)
         {
             pc.TakeDamage(attackDamage);
         }
+        else
+        {
+            Debug.LogWarning("[Boss] Khong tim thay PlayerCombat tren Player nen khong tru HP duoc.");
+        }
 
         if (animator != null) animator.SetTrigger("Attack");
         attackTimer = attackCooldown;
-        // Debug.Log($"[Boss] {data?.bossName} tấn công: {attackDamage} damage!");
         ChangeState(BossState.Chasing);
     }
 
@@ -278,10 +343,12 @@ public class BossController : MonoBehaviour, IDamageable
 
         if (target != null)
         {
-            float dist = Vector3.Distance(transform.position, target.position);
+            float dist = GetDistanceToTarget(target.position);
             if (dist < 2f)
             {
                 PlayerCombat pc = target.GetComponent<PlayerCombat>();
+                if (pc == null) pc = target.GetComponentInParent<PlayerCombat>();
+                if (pc == null) pc = target.GetComponentInChildren<PlayerCombat>();
                 pc?.TakeDamage(attackDamage * 1.5f);
             }
         }
@@ -302,14 +369,15 @@ public class BossController : MonoBehaviour, IDamageable
 
         if (target != null)
         {
-            float dist = Vector3.Distance(transform.position, target.position);
+            float dist = GetDistanceToTarget(target.position);
             if (dist <= aoeRadius)
             {
                 PlayerCombat pc = target.GetComponent<PlayerCombat>();
+                if (pc == null) pc = target.GetComponentInParent<PlayerCombat>();
+                if (pc == null) pc = target.GetComponentInChildren<PlayerCombat>();
                 pc?.TakeDamage(aoeDamage);
             }
         }
-        // Debug.Log($"[Boss] AOE Attack! Radius: {aoeRadius}");
         yield return new WaitForSeconds(0.5f);
         ChangeState(BossState.Idle);
     }
@@ -346,7 +414,6 @@ public class BossController : MonoBehaviour, IDamageable
                 }
             }
         }
-        // Debug.Log("[Boss] Triệu hồi quái vật!");
         yield return new WaitForSeconds(0.5f);
         ChangeState(BossState.Idle);
     }
@@ -355,6 +422,13 @@ public class BossController : MonoBehaviour, IDamageable
     {
         if (isDead) return;
         currentState = newState;
+    }
+
+    private float GetDistanceToTarget(Vector3 targetPos)
+    {
+        Vector3 toTarget = targetPos - transform.position;
+        toTarget.y = 0f;
+        return toTarget.magnitude;
     }
 
     public void TakeDamage(float damage, bool isCritical = false)

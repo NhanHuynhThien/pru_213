@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 [RequireComponent(typeof(CharacterController))]
 public class PlayerMovement : MonoBehaviour
@@ -12,9 +13,9 @@ public class PlayerMovement : MonoBehaviour
 
     [Header("Combat & Weapon Settings")]
     [SerializeField] private GameObject _swordPrefab; // Prefab thanh kiếm để gắn vào tay
-    [SerializeField] private float _attackDamage = 35f;
-    [SerializeField] private float _attackRange = 2f;
-    [SerializeField] private float _attackRadius = 1.2f;
+    [SerializeField] private float _attackDamage = 24f;
+    [SerializeField] private float _attackRange = 2.7f;
+    [SerializeField] private float _attackRadius = 1.6f;
     [SerializeField] private float _attackCooldown = 0.8f;
     [SerializeField] private Vector3 _swordOffset = new Vector3(0.03f, 0.102f, 0.062f); // Tinh chỉnh vị trí kiếm trong tay
     [SerializeField] private Vector3 _swordRotation = new Vector3(15.362f, -277.364f, -215.845f); // Tinh chỉnh góc xoay kiếm trong tay
@@ -57,7 +58,6 @@ public class PlayerMovement : MonoBehaviour
         // Kiểm tra xem chuột có đang tương tác với UI hoặc UI đang mở không
         bool isPointerOverUI = UnityEngine.EventSystems.EventSystem.current != null && 
                                UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject();
-        bool isCursorUnlocked = Cursor.lockState != CursorLockMode.Locked;
         bool isUIOpen = (InventoryUI.Instance != null && InventoryUI.Instance.IsOpen) ||
                         (BlacksmithUI.Instance != null && BlacksmithUI.Instance.IsOpen) ||
                         (UIManager.Instance != null && (
@@ -68,8 +68,8 @@ public class PlayerMovement : MonoBehaviour
                             (UIManager.Instance.characterStatsPanel != null && UIManager.Instance.characterStatsPanel.activeSelf)
                         ));
 
-        bool blockAttack = isPointerOverUI || isCursorUnlocked || isUIOpen || _wasUIOpenLastFrame;
-        _wasUIOpenLastFrame = isCursorUnlocked || isUIOpen;
+        bool blockAttack = isPointerOverUI || isUIOpen || _wasUIOpenLastFrame;
+        _wasUIOpenLastFrame = isUIOpen;
 
         // Đòn đánh (Chuột trái hoặc phím F)
         if (!blockAttack && (Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.F)) && !_isAttacking && _attackCooldownTimer <= 0f)
@@ -104,9 +104,9 @@ public class PlayerMovement : MonoBehaviour
 
     private void HandleMovementAndRotation()
     {
-        // Get movement inputs
-        float x = Input.GetAxis("Horizontal");
-        float z = Input.GetAxis("Vertical");
+        Vector2 input = ReadMovementInput();
+        float x = input.x;
+        float z = input.y;
 
         // Calculate direction relative to camera facing direction
         Vector3 camForward = Vector3.forward;
@@ -122,6 +122,10 @@ public class PlayerMovement : MonoBehaviour
         }
 
         Vector3 move = camRight * x + camForward * z;
+        if (move.sqrMagnitude > 1f)
+        {
+            move.Normalize();
+        }
 
         // Xoay nhân vật mượt mà theo hướng di chuyển (chỉ xoay khi có di chuyển và không đang đánh)
         if (move.magnitude > 0.1f && !_isAttacking)
@@ -159,6 +163,26 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+    private Vector2 ReadMovementInput()
+    {
+        float x = Input.GetAxisRaw("Horizontal");
+        float z = Input.GetAxisRaw("Vertical");
+
+        float keyX = 0f;
+        if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow)) keyX -= 1f;
+        if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow)) keyX += 1f;
+
+        float keyZ = 0f;
+        if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow)) keyZ -= 1f;
+        if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow)) keyZ += 1f;
+
+        if (Mathf.Abs(keyX) > 0.01f) x = keyX;
+        if (Mathf.Abs(keyZ) > 0.01f) z = keyZ;
+
+        Vector2 input = new Vector2(x, z);
+        return input.sqrMagnitude > 1f ? input.normalized : input;
+    }
+
     private IEnumerator PerformAttack()
     {
         _isAttacking = true;
@@ -176,22 +200,26 @@ public class PlayerMovement : MonoBehaviour
         // Tìm kiếm các đối tượng bị chém trúng trong hình cầu phía trước nhân vật
         Vector3 attackPosition = transform.position + transform.forward * _attackRange * 0.5f + Vector3.up * 1.0f;
         Collider[] hitColliders = Physics.OverlapSphere(attackPosition, _attackRadius);
+        HashSet<IDamageable> damagedTargets = new HashSet<IDamageable>();
 
         foreach (var col in hitColliders)
         {
             // Bỏ qua chính bản thân người chơi
-            if (col.gameObject == this.gameObject) continue;
+            if (col.transform == transform || col.transform.IsChildOf(transform)) continue;
 
             // Gây sát thương lên Boss hoặc Enemy có component IDamageable
             IDamageable damageable = col.GetComponentInParent<IDamageable>();
             if (damageable != null)
             {
+                if (damagedTargets.Contains(damageable)) continue;
+
                 try
                 {
                     bool isCritical = Random.value < 0.2f; // 20% chí mạng
                     float damage = isCritical ? _attackDamage * 1.5f : _attackDamage;
 
                     damageable.TakeDamage(damage, isCritical);
+                    damagedTargets.Add(damageable);
                     Debug.Log($"<color=red>[Chiến đấu]</color> Đã chém trúng <b>{col.name}</b> gây {damage} sát thương!");
                 }
                 catch (System.Exception ex)
@@ -201,9 +229,49 @@ public class PlayerMovement : MonoBehaviour
             }
         }
 
+        foreach (EnemyController enemy in FindObjectsByType<EnemyController>(FindObjectsSortMode.None))
+        {
+            if (enemy != null && IsTargetInsideAttackCone(enemy.transform) && !damagedTargets.Contains(enemy))
+            {
+                DamageKnownTarget(enemy, enemy.name, damagedTargets);
+            }
+        }
+
+        foreach (BossController boss in FindObjectsByType<BossController>(FindObjectsSortMode.None))
+        {
+            if (boss != null && IsTargetInsideAttackCone(boss.transform) && !damagedTargets.Contains(boss))
+            {
+                DamageKnownTarget(boss, boss.name, damagedTargets);
+            }
+        }
+
         // Chờ phần còn lại của hoạt ảnh kết thúc
         yield return new WaitForSeconds(_attackCooldown - 0.25f);
         _isAttacking = false;
+    }
+
+    private bool IsTargetInsideAttackCone(Transform target)
+    {
+        if (target == null || target == transform || target.IsChildOf(transform)) return false;
+
+        Vector3 toTarget = target.position - transform.position;
+        toTarget.y = 0f;
+        if (toTarget.sqrMagnitude > _attackRange * _attackRange) return false;
+        if (toTarget.sqrMagnitude < 0.05f) return true;
+
+        return Vector3.Angle(transform.forward, toTarget.normalized) <= 100f;
+    }
+
+    private void DamageKnownTarget(IDamageable target, string targetName, HashSet<IDamageable> damagedTargets)
+    {
+        if (target == null || damagedTargets.Contains(target)) return;
+
+        bool isCritical = Random.value < 0.2f;
+        float damage = isCritical ? _attackDamage * 1.5f : _attackDamage;
+        target.TakeDamage(damage, isCritical);
+        damagedTargets.Add(target);
+
+        Debug.Log($"[PlayerMovement] Chem trung {targetName}, gay {damage} damage.");
     }
 
     // Nhận diện va chạm để nhặt vật phẩm

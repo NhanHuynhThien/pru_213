@@ -15,20 +15,20 @@ MonoBehaviour:
   enemyName: U Minh Cai
   enemyID: 3
   type: 2
-  maxHealth: 150
-  moveSpeed: 2.5
-  attackDamage: 25
+  maxHealth: 240
+  moveSpeed: 2.8
+  attackDamage: 22
   attackRange: 2.5
-  attackCooldown: 2
-  sightRange: 12
-  chaseRange: 18
-  defense: 8
+  attackCooldown: 1.8
+  sightRange: 14
+  chaseRange: 24
+  defense: 6
   tier1Multiplier: 1
-  tier2Multiplier: 1.5
-  tier3Multiplier: 2
-  tier4Multiplier: 3
+  tier2Multiplier: 1.35
+  tier3Multiplier: 1.8
+  tier4Multiplier: 2.5
   copperReward: 25
   expReward: 50
   spawnWeight: 0.1
-  modelPrefab: {fileID: 0}
+  modelPrefab: {fileID: 100001, guid: 3696ee06935af594493baabc4d8c1fa9, type: 3}
   deathEffect: {fileID: 0}

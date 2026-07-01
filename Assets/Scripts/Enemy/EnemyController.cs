@@ -37,6 +37,9 @@ public class EnemyController : MonoBehaviour, IDamageable
     private NavMeshAgent navAgent;
     private bool isDead = false;
     private Vector3 spawnPosition;
+    private Vector3 directPatrolPoint;
+    private float directPatrolTimer = 0f;
+    private float targetSearchTimer = 0f;
 
     public event System.Action<EnemyController> OnEnemyDeath;
 
@@ -50,9 +53,18 @@ public class EnemyController : MonoBehaviour, IDamageable
     void Start()
     {
         ApplyTierScaling();
-        currentHealth = data.GetScaledHealth(currentTier);
-        currentDamage = data.GetScaledDamage(currentTier);
-        currentSpeed = data.moveSpeed;
+        if (data != null)
+        {
+            currentHealth = data.GetScaledHealth(currentTier);
+            currentDamage = data.GetScaledDamage(currentTier);
+            currentSpeed = data.moveSpeed;
+        }
+        else
+        {
+            currentHealth = 80f;
+            currentDamage = 8f;
+            currentSpeed = 3f;
+        }
 
         if (navAgent != null)
         {
@@ -60,10 +72,15 @@ public class EnemyController : MonoBehaviour, IDamageable
             navAgent.stoppingDistance = attackRange * 0.8f;
         }
 
-        GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
-        if (playerObj != null) target = playerObj.transform;
+        if (data != null)
+        {
+            sightRange = data.sightRange;
+            chaseRange = data.chaseRange;
+            attackRange = data.attackRange;
+        }
 
-        ChangeState(EnemyState.Idle);
+        FindPlayerTarget();
+        ChangeState(EnemyState.Patrol);
     }
 
     public void ApplyTierScaling()
@@ -82,6 +99,13 @@ public class EnemyController : MonoBehaviour, IDamageable
     void Update()
     {
         if (isDead) return;
+
+        targetSearchTimer -= Time.deltaTime;
+        if (target == null || targetSearchTimer <= 0f)
+        {
+            FindPlayerTarget();
+            targetSearchTimer = 0.5f;
+        }
 
         switch (currentState)
         {
@@ -106,8 +130,8 @@ public class EnemyController : MonoBehaviour, IDamageable
 
         if (target != null)
         {
-            float dist = Vector3.Distance(transform.position, target.position);
-            if (dist <= sightRange && currentState != EnemyState.Attack && currentState != EnemyState.Chase)
+            float dist = GetDistanceToTarget(target.position);
+            if (dist <= chaseRange && currentState != EnemyState.Attack && currentState != EnemyState.Chase)
             {
                 ChangeState(EnemyState.Chase);
             }
@@ -120,15 +144,16 @@ public class EnemyController : MonoBehaviour, IDamageable
 
     void UpdateIdle()
     {
-        if (Random.Range(0f, 1f) < 0.005f)
-        {
-            ChangeState(EnemyState.Patrol);
-        }
+        ChangeState(EnemyState.Patrol);
     }
 
     void UpdatePatrol()
     {
-        if (navAgent == null || !navAgent.isOnNavMesh) return;
+        if (!CanUseNavAgent())
+        {
+            DirectPatrol();
+            return;
+        }
 
         if (!navAgent.hasPath || navAgent.remainingDistance < 0.5f)
         {
@@ -143,12 +168,19 @@ public class EnemyController : MonoBehaviour, IDamageable
 
     void UpdateChase()
     {
-        if (target == null || navAgent == null || !navAgent.isOnNavMesh) return;
+        if (target == null) return;
 
-        navAgent.SetDestination(target.position);
-        navAgent.speed = currentSpeed * 1.2f;
+        if (CanUseNavAgent())
+        {
+            navAgent.SetDestination(target.position);
+            navAgent.speed = currentSpeed * 1.2f;
+        }
+        else
+        {
+            MoveDirectlyToTarget();
+        }
 
-        float dist = Vector3.Distance(transform.position, target.position);
+        float dist = GetDistanceToTarget(target.position);
         if (dist <= attackRange)
         {
             ChangeState(EnemyState.Attack);
@@ -163,12 +195,16 @@ public class EnemyController : MonoBehaviour, IDamageable
             return;
         }
 
-        if (navAgent != null && navAgent.isOnNavMesh)
+        if (CanUseNavAgent())
         {
             navAgent.SetDestination(target.position);
         }
+        else
+        {
+            LookAtTarget();
+        }
 
-        float dist = Vector3.Distance(transform.position, target.position);
+        float dist = GetDistanceToTarget(target.position);
         if (dist > attackRange * 1.5f)
         {
             ChangeState(EnemyState.Chase);
@@ -178,7 +214,7 @@ public class EnemyController : MonoBehaviour, IDamageable
         if (attackTimer <= 0f)
         {
             PerformAttack();
-            attackTimer = data.attackCooldown;
+            attackTimer = data != null ? data.attackCooldown : 1.5f;
         }
 
         if (animator != null)
@@ -192,9 +228,15 @@ public class EnemyController : MonoBehaviour, IDamageable
         if (target == null) return;
 
         PlayerCombat pc = target.GetComponent<PlayerCombat>();
+        if (pc == null) pc = target.GetComponentInParent<PlayerCombat>();
+        if (pc == null) pc = target.GetComponentInChildren<PlayerCombat>();
         if (pc != null)
         {
             pc.TakeDamage(currentDamage);
+        }
+        else
+        {
+            Debug.LogWarning("[Enemy] Khong tim thay PlayerCombat tren Player nen khong tru HP duoc.");
         }
 
         if (animator != null)
@@ -202,7 +244,7 @@ public class EnemyController : MonoBehaviour, IDamageable
             animator.SetTrigger("Attack");
         }
 
-        Debug.Log($"[Enemy] {data.enemyName} tấn công gây {currentDamage} damage!");
+        Debug.Log($"[Enemy] {(data != null ? data.enemyName : name)} tan cong gay {currentDamage} damage!");
     }
 
     void ChangeState(EnemyState newState)
@@ -210,37 +252,49 @@ public class EnemyController : MonoBehaviour, IDamageable
         if (isDead) return;
         currentState = newState;
 
-        if (navAgent == null) return;
-
         switch (newState)
         {
             case EnemyState.Idle:
-                navAgent.isStopped = true;
+                if (CanUseNavAgent()) navAgent.isStopped = true;
                 if (animator != null) animator.SetFloat("Speed", 0f);
                 break;
             case EnemyState.Patrol:
-                navAgent.isStopped = false;
-                navAgent.speed = currentSpeed * 0.5f;
-                SetRandomPatrolPoint();
+                if (CanUseNavAgent())
+                {
+                    navAgent.isStopped = false;
+                    navAgent.speed = currentSpeed * 0.5f;
+                    SetRandomPatrolPoint();
+                }
                 break;
             case EnemyState.Chase:
-                navAgent.isStopped = false;
-                navAgent.speed = currentSpeed * 1.2f;
+                if (CanUseNavAgent())
+                {
+                    navAgent.isStopped = false;
+                    navAgent.speed = currentSpeed * 1.2f;
+                }
                 if (animator != null) animator.SetFloat("Speed", 1f);
                 break;
             case EnemyState.Attack:
-                navAgent.isStopped = true;
+                if (CanUseNavAgent()) navAgent.isStopped = true;
                 if (animator != null) animator.SetFloat("Speed", 0f);
-                transform.LookAt(new Vector3(target.position.x, transform.position.y, target.position.z));
+                LookAtTarget();
                 break;
             case EnemyState.Stunned:
-                navAgent.isStopped = true;
+                if (CanUseNavAgent()) navAgent.isStopped = true;
                 break;
         }
     }
 
     void SetRandomPatrolPoint()
     {
+        if (!CanUseNavAgent())
+        {
+            Vector2 randomCircle = Random.insideUnitCircle * patrolRadius;
+            directPatrolPoint = patrolCenter + new Vector3(randomCircle.x, 0f, randomCircle.y);
+            directPatrolPoint.y = transform.position.y;
+            return;
+        }
+
         Vector3 randomDir = Random.insideUnitSphere * patrolRadius;
         randomDir += patrolCenter;
         if (NavMesh.SamplePosition(randomDir, out NavMeshHit hit, patrolRadius, NavMesh.AllAreas))
@@ -250,11 +304,92 @@ public class EnemyController : MonoBehaviour, IDamageable
         }
     }
 
+    private bool CanUseNavAgent()
+    {
+        return navAgent != null && navAgent.enabled && navAgent.isOnNavMesh;
+    }
+
+    private void FindPlayerTarget()
+    {
+        GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+        if (playerObj != null)
+        {
+            target = playerObj.transform;
+            return;
+        }
+
+        PlayerCombat playerCombat = FindFirstObjectByType<PlayerCombat>();
+        if (playerCombat != null)
+        {
+            target = playerCombat.transform;
+        }
+    }
+
+    private void DirectPatrol()
+    {
+        directPatrolTimer -= Time.deltaTime;
+        Vector3 toPoint = directPatrolPoint - transform.position;
+        toPoint.y = 0f;
+
+        if (directPatrolTimer <= 0f || toPoint.sqrMagnitude < 0.4f)
+        {
+            SetRandomPatrolPoint();
+            directPatrolTimer = patrolWaitTime;
+            return;
+        }
+
+        float speed = Mathf.Max(1f, currentSpeed * 0.45f);
+        transform.position += toPoint.normalized * speed * Time.deltaTime;
+
+        if (toPoint.sqrMagnitude > 0.001f)
+        {
+            transform.rotation = Quaternion.Slerp(
+                transform.rotation,
+                Quaternion.LookRotation(toPoint.normalized),
+                6f * Time.deltaTime
+            );
+        }
+
+        if (animator != null) animator.SetFloat("Speed", 0.5f);
+    }
+
+    private void MoveDirectlyToTarget()
+    {
+        if (target == null) return;
+
+        Vector3 targetPosition = new Vector3(target.position.x, transform.position.y, target.position.z);
+        Vector3 direction = targetPosition - transform.position;
+        if (direction.sqrMagnitude <= 0.001f) return;
+
+        float speed = Mathf.Max(1f, currentSpeed * 1.2f);
+        transform.position += direction.normalized * speed * Time.deltaTime;
+        LookAtTarget();
+    }
+
+    private void LookAtTarget()
+    {
+        if (target == null) return;
+
+        Vector3 lookPosition = new Vector3(target.position.x, transform.position.y, target.position.z);
+        Vector3 direction = lookPosition - transform.position;
+        if (direction.sqrMagnitude > 0.001f)
+        {
+            transform.rotation = Quaternion.LookRotation(direction.normalized);
+        }
+    }
+
+    private float GetDistanceToTarget(Vector3 targetPos)
+    {
+        Vector3 toTarget = targetPos - transform.position;
+        toTarget.y = 0f;
+        return toTarget.magnitude;
+    }
+
     public void TakeDamage(float damage, bool isCritical = false)
     {
         if (isDead) return;
 
-        float actualDamage = Mathf.Max(1f, damage - data.defense);
+        float actualDamage = Mathf.Max(1f, damage - (data != null ? data.defense : 0f));
         currentHealth -= actualDamage;
 
         DamagePopup.Create(transform.position + Vector3.up, (int)actualDamage, isCritical);
@@ -280,12 +415,12 @@ public class EnemyController : MonoBehaviour, IDamageable
             animator.SetTrigger("Death");
         }
 
-        if (data.deathEffect != null)
+        if (data != null && data.deathEffect != null)
         {
             Instantiate(data.deathEffect, transform.position, Quaternion.identity);
         }
 
-        if (target != null)
+        if (target != null && data != null)
         {
             PlayerStats ps = target.GetComponent<PlayerController>()?.stats;
             if (ps != null)

@@ -15,20 +15,20 @@ MonoBehaviour:
   enemyName: U Minh Sat
   enemyID: 2
   type: 1
-  maxHealth: 80
-  moveSpeed: 3.5
-  attackDamage: 15
-  attackRange: 2
-  attackCooldown: 1.2
-  sightRange: 10
-  chaseRange: 15
+  maxHealth: 180
+  moveSpeed: 3.4
+  attackDamage: 18
+  attackRange: 2.3
+  attackCooldown: 1.5
+  sightRange: 14
+  chaseRange: 24
   defense: 4
   tier1Multiplier: 1
-  tier2Multiplier: 1.5
-  tier3Multiplier: 2
-  tier4Multiplier: 3
+  tier2Multiplier: 1.35
+  tier3Multiplier: 1.8
+  tier4Multiplier: 2.5
   copperReward: 10
   expReward: 20
   spawnWeight: 0.5
-  modelPrefab: {fileID: 0}
+  modelPrefab: {fileID: 100001, guid: a52320f13c0012042bc03d446090cae9, type: 3}
   deathEffect: {fileID: 0}
