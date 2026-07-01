@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 
 public class BuildAllEnvironmentMenu
 {
@@ -8,7 +9,7 @@ public class BuildAllEnvironmentMenu
     {
         Debug.Log("Starting Complete Environment Build...");
         
-        // 1. Build basic map & outer fortress walls
+        // 1. Build basic map & outer fortress walls (Map 1)
         BuildCoLoaFortressMenu.BuildCoLoaMap();
         
         // 2. Build roads & city ground textures (now 100% dirt inside town)
@@ -41,6 +42,13 @@ public class BuildAllEnvironmentMenu
         // 11. Setup player and camera controller
         SetupPlayerMenu.SetupPlayer();
         
+        // 12. Build Rung Hac Am (Map 2)
+        BuildRungHacAmMenu.BuildRungHacAmScene();
+
+        // 13. Set up Portals to link Map 1 and Map 2
+        BuildPortalsMenu.SetUpPortals();
+        
         Debug.Log("Complete Environment Build finished successfully!");
     }
 }
+

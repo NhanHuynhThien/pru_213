@@ -33,7 +33,23 @@ public class FixMaterialsMenu
         }
 
         // 2. Scan and fix materials that might be using Built-in Standard shader or missing shaders
-        string[] materialGuids = AssetDatabase.FindAssets("t:Material", new[] { "Assets/Idyllic Fantasy Nature" });
+        string[] scanFolders = {
+            "Assets/JP Environmental Asset Pack",
+            "Assets/Silver_Cats",
+            "Assets/SkythianCat"
+        };
+        
+        System.Collections.Generic.List<string> materialGuidsList = new System.Collections.Generic.List<string>();
+        foreach (var folder in scanFolders)
+        {
+            if (AssetDatabase.IsValidFolder(folder))
+            {
+                string[] guids = AssetDatabase.FindAssets("t:Material", new[] { folder });
+                materialGuidsList.AddRange(guids);
+            }
+        }
+
+        string[] materialGuids = materialGuidsList.ToArray();
         int fixedCount = 0;
 
         foreach (string guid in materialGuids)
@@ -46,12 +62,38 @@ public class FixMaterialsMenu
             bool needsFix = false;
             Shader currentShader = mat.shader;
 
-            // Check if shader is missing/broken or is the Standard built-in shader
-            if (currentShader == null || 
-                currentShader.name == "Hidden/Internal-ErrorShader" || 
-                currentShader.name == "Standard")
+            if (currentShader == null || currentShader.name == "Hidden/Internal-ErrorShader")
             {
                 needsFix = true;
+            }
+            else
+            {
+                string shaderName = currentShader.name;
+                // If it doesn't contain URP or Shader Graph, and it's a standard/legacy shader that renders purple in URP
+                if (!shaderName.Contains("Universal Render Pipeline") && 
+                    !shaderName.Contains("Shader Graph") && 
+                    !shaderName.Contains("TextMeshPro") &&
+                    !shaderName.Contains("GUI") &&
+                    !shaderName.Contains("UI/") &&
+                    !shaderName.Contains("Sprite") &&
+                    !shaderName.Contains("Skybox") &&
+                    !shaderName.Contains("Unlit/"))
+                {
+                    needsFix = true;
+                }
+                
+                // Force check if it is already URP Lit but is a cutout leaf/branch/grass material missing alpha clip
+                if (shaderName == "Universal Render Pipeline/Lit")
+                {
+                    string matNameLower = mat.name.ToLower();
+                    if (matNameLower.Contains("branch") || matNameLower.Contains("leaf") || matNameLower.Contains("leaves") || matNameLower.Contains("foliage") || matNameLower.Contains("grass"))
+                    {
+                        if (mat.GetFloat("_AlphaClip") == 0f)
+                        {
+                            needsFix = true;
+                        }
+                    }
+                }
             }
 
             if (needsFix)
@@ -66,12 +108,15 @@ public class FixMaterialsMenu
                     Texture mainTex = null;
                     Color mainColor = Color.white;
                     Texture bumpMap = null;
-                    float cutoff = 0.5f;
+                    float cutoff = 0.3f;
 
                     if (mat.HasProperty("_MainTex")) mainTex = mat.GetTexture("_MainTex");
                     else if (mat.HasProperty("_Texture")) mainTex = mat.GetTexture("_Texture");
+                    else if (mat.HasProperty("_BaseMap")) mainTex = mat.GetTexture("_BaseMap");
 
                     if (mat.HasProperty("_Color")) mainColor = mat.GetColor("_Color");
+                    else if (mat.HasProperty("_BaseColor")) mainColor = mat.GetColor("_BaseColor");
+
                     if (mat.HasProperty("_BumpMap")) bumpMap = mat.GetTexture("_BumpMap");
                     if (mat.HasProperty("_Cutoff")) cutoff = mat.GetFloat("_Cutoff");
 
@@ -83,20 +128,32 @@ public class FixMaterialsMenu
                     mat.SetColor("_BaseColor", mainColor);
                     if (bumpMap != null) mat.SetTexture("_BumpMap", bumpMap);
 
-                    // If it was transparent/cutout, configure URP lit for alpha clipping
-                    if (mat.shaderKeywords != null)
+                    // Enable Alpha Clipping if it's cutout or leaf/branch/grass
+                    bool isCutout = false;
+                    string matNameLower = mat.name.ToLower();
+                    if (matNameLower.Contains("branch") || matNameLower.Contains("leaf") || matNameLower.Contains("leaves") || matNameLower.Contains("foliage") || matNameLower.Contains("grass"))
                     {
-                        foreach (string keyword in mat.shaderKeywords)
+                        isCutout = true;
+                    }
+                    if (currentShader != null)
+                    {
+                        string sName = currentShader.name.ToLower();
+                        if (sName.Contains("cutout") || sName.Contains("transparent") || sName.Contains("fade"))
                         {
-                            if (keyword == "_ALPHATEST_ON")
-                            {
-                                mat.SetFloat("_AlphaClip", 1f);
-                                mat.SetFloat("_Cutoff", cutoff);
-                                mat.EnableKeyword("_ALPHATEST_ON");
-                                mat.renderQueue = (int)UnityEngine.Rendering.RenderQueue.AlphaTest;
-                                break;
-                            }
+                            isCutout = true;
                         }
+                    }
+                    if (mat.HasProperty("_Mode") && mat.GetFloat("_Mode") > 0f)
+                    {
+                        isCutout = true;
+                    }
+
+                    if (isCutout)
+                    {
+                        mat.SetFloat("_AlphaClip", 1f);
+                        mat.SetFloat("_Cutoff", cutoff > 0.05f ? cutoff : 0.3f);
+                        mat.EnableKeyword("_ALPHATEST_ON");
+                        mat.renderQueue = (int)UnityEngine.Rendering.RenderQueue.AlphaTest;
                     }
 
                     EditorUtility.SetDirty(mat);

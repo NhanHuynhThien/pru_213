@@ -14,13 +14,19 @@
 
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-const SERVER_PATH = 'E:/PRU213/pru213_game-dev-nhanHuynh/UnityMCP/Server~/build/index.js';
-const PROJECT_PATH = 'E:/PRU213/pru213_game-dev-nhanHuynh';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Relative to UnityMCP/Server~/
+const PROJECT_PATH = path.resolve(__dirname, '../..');
+const SERVER_PATH = path.resolve(__dirname, 'build/index.js');
 
 async function createClient() {
   const transport = new StdioClientTransport({
-    command: 'node',
+    command: 'C:/Users/ADMIN/AppData/Local/ms-playwright-go/1.57.0/node.exe',
     args: [SERVER_PATH],
     cwd: PROJECT_PATH
   });
