@@ -15,12 +15,14 @@ MonoBehaviour:
   ID: 3
   SkinName: Gap Linh Quy
   Tier: 3
-  ModelPrefab: {fileID: 0}
+  ModelPrefab: {fileID: 8792665493964939140, guid: d9087896ecb661846afd572091a11254, type: 3}
   BonusHealth: 120
   BonusSpeed: 1
   BonusDamage: 5
   BonusDefense: 2.5
-  tierDescription: Giáp Linh Quy - Lớp giáp linh thiêng với khả năng triệu hồi.
-  tierLore: Giáp Linh Quy được chế tạo từ vỏ rùa thiêng, cho phép triệu hồi mũi tên đồng.
+  tierDescription: "Gi\xE1p Linh Quy - L\u1EDBp gi\xE1p linh thi\xEAng v\u1EDBi kh\u1EA3
+    n\u0103ng tri\u1EC7u h\u1ED3i."
+  tierLore: "Gi\xE1p Linh Quy \u0111\u01B0\u1EE3c ch\u1EBF t\u1EA1o t\u1EEB v\u1ECF
+    r\xF9a thi\xEAng, cho ph\xE9p tri\u1EC7u h\u1ED3i m\u0169i t\xEAn \u0111\u1ED3ng."
   equipEffect: {fileID: 0}
   armorColor: {r: 0.2, g: 0.6, b: 0.4, a: 1}

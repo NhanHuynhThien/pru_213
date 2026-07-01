@@ -15,12 +15,14 @@ MonoBehaviour:
   ID: 4
   SkinName: Than Vuong
   Tier: 4
-  ModelPrefab: {fileID: 0}
+  ModelPrefab: {fileID: 492230891008212248, guid: 682370f555b01c346926223c60dcaae4, type: 3}
   BonusHealth: 250
   BonusSpeed: 1.5
   BonusDamage: 10
   BonusDefense: 5
-  tierDescription: Thần Vương - Lớp giáp hoàng kim thần lực.
-  tierLore: Trang bị của Thần Vương, được ban phước bởi sức mạnh U Minh.
+  tierDescription: "Th\u1EA7n V\u01B0\u01A1ng - L\u1EDBp gi\xE1p ho\xE0ng kim th\u1EA7n
+    l\u1EF1c."
+  tierLore: "Trang b\u1ECB c\u1EE7a Th\u1EA7n V\u01B0\u01A1ng, \u0111\u01B0\u1EE3c
+    ban ph\u01B0\u1EDBc b\u1EDFi s\u1EE9c m\u1EA1nh U Minh."
   equipEffect: {fileID: 0}
   armorColor: {r: 1, g: 0.85, b: 0.2, a: 1}
