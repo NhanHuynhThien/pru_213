@@ -32,14 +32,14 @@ public class PlayerController : MonoBehaviour
     private Vector3 moveDirection;
     private float verticalRotation = 0f;
     private float horizontalRotation = 0f;
-    private bool isJumping = false;
-    private bool isSprinting = false;
-    private bool isAttacking = false;
+    [HideInInspector] public bool isSprinting;
+    [HideInInspector] public bool isJumping;
+    [HideInInspector] public bool isAttacking;
     private bool isGrounded = true;
     private float attackTimer = 0f;
     private float summonCooldown = 0f;
     private const float SUMMON_COOLDOWN = 5f;
-    private bool wasUIOpenLastFrame = false;
+    private bool wasUIOpenLastFrame = false; // Thêm khai báo để tránh lỗi thiếu biến từ Main
 
     public bool IsMoving { get; private set; }
     public bool IsGrounded => isGrounded;
@@ -55,6 +55,15 @@ public class PlayerController : MonoBehaviour
 
         if (stats == null)
             stats = ScriptableObject.CreateInstance<PlayerStats>();
+
+        // Thêm Rigidbody để nhận biết trigger va chạm
+        Rigidbody rb = GetComponent<Rigidbody>();
+        if (rb == null)
+        {
+            rb = gameObject.AddComponent<Rigidbody>();
+            rb.isKinematic = true;
+            rb.useGravity = false;
+        }
     }
 
     void Start()
@@ -67,8 +76,11 @@ public class PlayerController : MonoBehaviour
             animator = GetComponentInChildren<Animator>();
 
         walkSpeed = stats.moveSpeed;
+        if (walkSpeed <= 0.1f) walkSpeed = 5f;
         sprintSpeed = stats.sprintSpeed;
+        if (sprintSpeed <= 0.1f) sprintSpeed = 8f;
         jumpHeight = stats.jumpForce * 0.25f;
+        if (jumpHeight <= 0.1f) jumpHeight = 2f;
     }
 
     void Update()
@@ -78,17 +90,8 @@ public class PlayerController : MonoBehaviour
         HandleJump();
         HandleAttackCooldown();
 
-        bool isUIOpen = (InventoryUI.Instance != null && InventoryUI.Instance.IsOpen) ||
-                        (BlacksmithUI.Instance != null && BlacksmithUI.Instance.IsOpen) ||
-                        (UIManager.Instance != null && (
-                            (UIManager.Instance.pausePanel != null && UIManager.Instance.pausePanel.activeSelf) ||
-                            (UIManager.Instance.upgradePanel != null && UIManager.Instance.upgradePanel.activeSelf) ||
-                            (UIManager.Instance.gameOverPanel != null && UIManager.Instance.gameOverPanel.activeSelf) ||
-                            (UIManager.Instance.victoryPanel != null && UIManager.Instance.victoryPanel.activeSelf) ||
-                            (UIManager.Instance.characterStatsPanel != null && UIManager.Instance.characterStatsPanel.activeSelf)
-                        ));
-        bool blockInput = isUIOpen || wasUIOpenLastFrame;
-        wasUIOpenLastFrame = isUIOpen;
+        // Giữ nguyên Logic tối ưu của bạn: Dựa vào trạng thái khóa chuột để chặn input chiến đấu
+        bool blockInput = Cursor.lockState != CursorLockMode.Locked;
 
         if (isAttacking && attackTimer <= 0f)
         {
@@ -218,60 +221,7 @@ public class PlayerController : MonoBehaviour
 
     void HandleMovement()
     {
-        bool isUIOpen = (InventoryUI.Instance != null && InventoryUI.Instance.IsOpen) ||
-                        (BlacksmithUI.Instance != null && BlacksmithUI.Instance.IsOpen) ||
-                        (UIManager.Instance != null && (
-                            (UIManager.Instance.pausePanel != null && UIManager.Instance.pausePanel.activeSelf) ||
-                            (UIManager.Instance.upgradePanel != null && UIManager.Instance.upgradePanel.activeSelf) ||
-                            (UIManager.Instance.gameOverPanel != null && UIManager.Instance.gameOverPanel.activeSelf) ||
-                            (UIManager.Instance.victoryPanel != null && UIManager.Instance.victoryPanel.activeSelf) ||
-                            (UIManager.Instance.characterStatsPanel != null && UIManager.Instance.characterStatsPanel.activeSelf)
-                        ));
-        bool blockInput = isUIOpen || wasUIOpenLastFrame;
-
-        Vector2 input = blockInput ? Vector2.zero : ReadMovementInput();
-        float h = input.x;
-        float v = input.y;
-        IsMoving = Mathf.Abs(h) > 0.1f || Mathf.Abs(v) > 0.1f;
-
-        float speed = (isSprinting && !blockInput) ? sprintSpeed : walkSpeed;
-
-        if (cameraTransform != null)
-        {
-            Vector3 forward = cameraTransform.forward;
-            Vector3 right = cameraTransform.right;
-            forward.y = 0f;
-            right.y = 0f;
-            forward.Normalize();
-            right.Normalize();
-
-            moveDirection = (forward * v + right * h) * speed;
-        }
-        else
-        {
-            moveDirection = new Vector3(h, 0f, v) * speed;
-        }
-
-        // Apply movement (both horizontal and vertical) to avoid getting stuck on obstacles
-        Vector3 finalMove = moveDirection + velocity;
-        characterController.Move(finalMove * Time.deltaTime);
-
-        if (h != 0f || v != 0f)
-        {
-            float targetRotation = Mathf.Atan2(moveDirection.x, moveDirection.z) * Mathf.Rad2Deg;
-            transform.rotation = Quaternion.Slerp(
-                transform.rotation,
-                Quaternion.Euler(0f, targetRotation, 0f),
-                10f * Time.deltaTime
-            );
-        }
-
-        if (animator != null)
-        {
-            float targetSpeed = IsMoving ? 1.0f : 0.0f;
-            animator.SetFloat("Speed", targetSpeed, 0.1f, Time.deltaTime);
-            animator.speed = (IsMoving && isSprinting) ? 1.5f : 1.0f;
-        }
+        // Giữ nguyên việc vô hiệu hóa của bạn để tránh xung đột với PlayerMovement.cs
     }
 
     private Vector2 ReadMovementInput()
@@ -297,18 +247,12 @@ public class PlayerController : MonoBehaviour
 
     void HandleJump()
     {
-        if (!isGrounded)
-        {
-            velocity.y += gravity * Time.deltaTime;
-            if (velocity.y < -25f) velocity.y = -25f; // Giới hạn vận tốc rơi để tránh lỗi xuyên tường
-        }
+        // Giữ nguyên việc vô hiệu hóa của bạn để tránh xung đột với PlayerMovement.cs
     }
 
     void Jump()
     {
-        velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
-        isJumping = true;
-        isGrounded = false;
+        // Giữ nguyên việc vô hiệu hóa của bạn để tránh xung đột với PlayerMovement.cs
     }
 
     public void Attack()
@@ -319,15 +263,12 @@ public class PlayerController : MonoBehaviour
 
         if (stats != null)
         {
-            // Điều chỉnh tâm của vùng đánh: dời lên 1 chút (Vector3.up * 1f) và tiến tới trước mặt một nửa tầm đánh. 
-            // Như vậy sẽ không bị góc chết khi quái đứng quá sát nhân vật.
             Vector3 attackPos = transform.position + transform.forward * (attackRange * 0.5f) + Vector3.up * 1f;
 
             Collider[] hits = Physics.OverlapSphere(attackPos, attackRadius);
             HashSet<IDamageable> damagedTargets = new HashSet<IDamageable>();
             foreach (Collider hit in hits)
             {
-                // Bỏ qua chính bản thân người chơi
                 if (hit.transform == transform || hit.transform.IsChildOf(transform)) continue;
 
                 IDamageable dmg = hit.GetComponentInParent<IDamageable>();

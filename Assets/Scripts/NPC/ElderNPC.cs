@@ -35,7 +35,7 @@ public class ElderNPC : MonoBehaviour
             if (pc != null)
             {
                 _playerTransform = pc.transform;
-                _playerSkinManager = pc.GetComponent<SkinManager>();
+                _playerSkinManager = pc.GetComponentInChildren<SkinManager>();
             }
             else
             {
@@ -43,7 +43,7 @@ public class ElderNPC : MonoBehaviour
                 if (pm != null)
                 {
                     _playerTransform = pm.transform;
-                    _playerSkinManager = pm.GetComponent<SkinManager>();
+                    _playerSkinManager = pm.GetComponentInChildren<SkinManager>();
                 }
             }
         }
