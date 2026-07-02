@@ -19,6 +19,8 @@ public class InventoryUI : MonoBehaviour
     private TextMeshProUGUI _bronzeIngotText;
     private TextMeshProUGUI _weaponText;
     private TextMeshProUGUI _spiritualStoneText;
+    private TextMeshProUGUI _magicCrystalText;
+    private TextMeshProUGUI _darkCrystalText;
 
     private PlayerStats _stats;
     private PlayerMovement _playerMovement;
@@ -40,7 +42,7 @@ public class InventoryUI : MonoBehaviour
     {
         if (Instance != null && Instance != this)
         {
-            Destroy(gameObject);
+            Destroy(this);
             return;
         }
         Instance = this;
@@ -277,9 +279,7 @@ public class InventoryUI : MonoBehaviour
         Transform existingPanel = canvasObj.transform.Find("CustomInventoryPanel");
         if (existingPanel != null)
         {
-            _inventoryPanel = existingPanel.gameObject;
-            AssignPanelTexts();
-            return;
+            DestroyImmediate(existingPanel.gameObject);
         }
 
         // Tạo Panel chính
@@ -290,22 +290,22 @@ public class InventoryUI : MonoBehaviour
         rect.anchorMin = new Vector2(0.5f, 0.5f);
         rect.anchorMax = new Vector2(0.5f, 0.5f);
         rect.pivot = new Vector2(0.5f, 0.5f);
-        rect.sizeDelta = new Vector2(380f, 300f);
+        rect.sizeDelta = new Vector2(500f, 450f); // Tăng chiều cao lên 450 để chứa đủ 4 hàng
 
         // Nền tối mờ cao cấp
         Image bgImg = _inventoryPanel.AddComponent<Image>();
-        bgImg.color = new Color(0.07f, 0.07f, 0.09f, 0.95f);
+        bgImg.color = new Color(0.05f, 0.05f, 0.07f, 0.95f);
 
         Outline panelOutline = _inventoryPanel.AddComponent<Outline>();
-        panelOutline.effectColor = new Color(1f, 0.84f, 0f, 0.8f);
+        panelOutline.effectColor = new Color(1f, 0.84f, 0f, 0.6f);
         panelOutline.effectDistance = new Vector2(2f, -2f);
 
         // Tiêu đề
         GameObject titleObj = new GameObject("TitleText", typeof(RectTransform));
         titleObj.transform.SetParent(_inventoryPanel.transform, false);
         TextMeshProUGUI titleTxt = titleObj.AddComponent<TextMeshProUGUI>();
-        titleTxt.text = "🎒 HÀNH TRANG LOA THÀNH";
-        titleTxt.fontSize = 18f;
+        titleTxt.text = "- HÀNH TRANG -"; // Bỏ emoji
+        titleTxt.fontSize = 22f;
         titleTxt.fontStyle = FontStyles.Bold;
         titleTxt.alignment = TextAlignmentOptions.Center;
         titleTxt.color = new Color(1f, 0.84f, 0f, 1f);
@@ -314,33 +314,73 @@ public class InventoryUI : MonoBehaviour
         titleRect.anchorMin = new Vector2(0f, 1f);
         titleRect.anchorMax = new Vector2(1f, 1f);
         titleRect.pivot = new Vector2(0.5f, 1f);
-        titleRect.anchoredPosition = new Vector2(0f, -15f);
-        titleRect.sizeDelta = new Vector2(0f, 35f);
+        titleRect.anchoredPosition = new Vector2(0f, -20f);
+        titleRect.sizeDelta = new Vector2(0f, 40f);
 
-        // Khung nội dung
-        GameObject contentObj = new GameObject("Content", typeof(RectTransform));
-        contentObj.transform.SetParent(_inventoryPanel.transform, false);
-        RectTransform contentRect = contentObj.GetComponent<RectTransform>();
-        contentRect.anchorMin = new Vector2(0f, 0f);
-        contentRect.anchorMax = new Vector2(1f, 1f);
-        contentRect.pivot = new Vector2(0.5f, 0.5f);
-        contentRect.anchoredPosition = new Vector2(0f, -15f);
-        contentRect.sizeDelta = new Vector2(-40f, -80f);
+        // Đường viền ngang dưới tiêu đề
+        GameObject lineObj = new GameObject("Separator", typeof(RectTransform));
+        lineObj.transform.SetParent(_inventoryPanel.transform, false);
+        Image lineImg = lineObj.AddComponent<Image>();
+        lineImg.color = new Color(1f, 0.84f, 0f, 0.3f);
+        RectTransform lineRect = lineObj.GetComponent<RectTransform>();
+        lineRect.anchorMin = new Vector2(0.1f, 1f); lineRect.anchorMax = new Vector2(0.9f, 1f);
+        lineRect.pivot = new Vector2(0.5f, 1f);
+        lineRect.anchoredPosition = new Vector2(0f, -60f); lineRect.sizeDelta = new Vector2(0f, 2f);
 
-        VerticalLayoutGroup layout = contentObj.AddComponent<VerticalLayoutGroup>();
-        layout.spacing = 10f;
-        layout.childControlHeight = true;
-        layout.childControlWidth = true;
-        layout.childForceExpandHeight = false;
-        layout.childForceExpandWidth = true;
+        // Lưới hiển thị Item
+        GameObject gridObj = new GameObject("ItemGrid", typeof(RectTransform));
+        gridObj.transform.SetParent(_inventoryPanel.transform, false);
+        RectTransform gridRect = gridObj.GetComponent<RectTransform>();
+        gridRect.anchorMin = new Vector2(0f, 0f);
+        gridRect.anchorMax = new Vector2(1f, 1f);
+        gridRect.offsetMin = new Vector2(30f, 110f); // Tăng lề dưới để chừa chỗ cho vũ khí
+        gridRect.offsetMax = new Vector2(-30f, -75f); // Căn lề trái phải 30px cân xứng tuyệt đối
 
-        // Tạo các dòng hiển thị tài nguyên
-        _copperText = CreateInventoryRow(contentObj, "🔸 Đồng (Copper):", "0");
-        _tinText = CreateInventoryRow(contentObj, "⚪ Thiếc (Tin):", "0");
-        _turtleShellText = CreateInventoryRow(contentObj, "🐢 Mai Linh Quy (Shell):", "0");
-        _bronzeIngotText = CreateInventoryRow(contentObj, "⭐ Thỏi Đồng Thau (Bronze):", "0");
-        _spiritualStoneText = CreateInventoryRow(contentObj, "💎 Đá Linh Khí (Stone):", "0");
-        _weaponText = CreateInventoryRow(contentObj, "⚔️ Vũ khí hiện tại:", "Không có");
+        GridLayoutGroup grid = gridObj.AddComponent<GridLayoutGroup>();
+        grid.cellSize = new Vector2(210f, 50f); // Kích cỡ ô chuẩn
+        grid.spacing = new Vector2(20f, 15f);  // Khoảng cách ô cân xứng tuyệt đối
+        grid.startAxis = GridLayoutGroup.Axis.Horizontal;
+        grid.childAlignment = TextAnchor.UpperCenter;
+
+        // Tạo các khối Item (Không dùng icon viết tắt, chỉ dùng nhãn chữ)
+        _copperText = CreateInventoryItem(gridObj, "Đồng (Copper)", "0");
+        _tinText = CreateInventoryItem(gridObj, "Thiếc (Tin)", "0");
+        _bronzeIngotText = CreateInventoryItem(gridObj, "Thỏi Đồng", "0");
+        _turtleShellText = CreateInventoryItem(gridObj, "Mai Linh Quy", "0");
+        _spiritualStoneText = CreateInventoryItem(gridObj, "Ngọc Lưu Ly", "0");
+        _magicCrystalText = CreateInventoryItem(gridObj, "Tử Ma Thạch", "0");
+        _darkCrystalText = CreateInventoryItem(gridObj, "Hắc Ám Tinh Thể", "0");
+
+        // Vũ khí hiện tại (Dưới lưới item)
+        GameObject weaponObj = new GameObject("WeaponContainer", typeof(RectTransform));
+        weaponObj.transform.SetParent(_inventoryPanel.transform, false);
+        RectTransform wRect = weaponObj.GetComponent<RectTransform>();
+        wRect.anchorMin = new Vector2(0.06f, 0f); wRect.anchorMax = new Vector2(0.94f, 0f); // Căn ngang 30px tương đương lưới
+        wRect.pivot = new Vector2(0.5f, 0f);
+        wRect.anchoredPosition = new Vector2(0f, 60f); // Đặt cách đáy 60px
+        wRect.sizeDelta = new Vector2(0f, 45f); // Tăng chiều cao lên 45px cho thoáng
+        Image wBg = weaponObj.AddComponent<Image>();
+        wBg.color = new Color(0.12f, 0.12f, 0.15f, 0.9f);
+        Outline wOut = weaponObj.AddComponent<Outline>();
+        wOut.effectColor = new Color(1.0f, 0.84f, 0f, 0.3f);
+        
+        TextMeshProUGUI wLbl = new GameObject("Label", typeof(RectTransform)).AddComponent<TextMeshProUGUI>();
+        wLbl.transform.SetParent(weaponObj.transform, false);
+        wLbl.text = "Vũ khí trang bị:"; 
+        wLbl.fontSize = 13f; wLbl.alignment = TextAlignmentOptions.MidlineLeft; // Căn dọc ở giữa + lề trái
+        wLbl.color = new Color(0.7f, 0.7f, 0.7f, 1f);
+        wLbl.GetComponent<RectTransform>().anchorMin = new Vector2(0f,0f); wLbl.GetComponent<RectTransform>().anchorMax = new Vector2(1f,1f);
+        wLbl.GetComponent<RectTransform>().offsetMin = new Vector2(15f,0f);
+        wLbl.GetComponent<RectTransform>().offsetMax = new Vector2(-150f,0f); // Tránh ghi đè chữ bên phải
+        
+        _weaponText = new GameObject("Value", typeof(RectTransform)).AddComponent<TextMeshProUGUI>();
+        _weaponText.transform.SetParent(weaponObj.transform, false);
+        _weaponText.text = "Không có"; _weaponText.fontSize = 14f; _weaponText.fontStyle = FontStyles.Bold; 
+        _weaponText.alignment = TextAlignmentOptions.MidlineRight; // Căn dọc ở giữa + lề phải
+        _weaponText.color = new Color(1f, 0.4f, 0.4f);
+        _weaponText.GetComponent<RectTransform>().anchorMin = new Vector2(0f,0f); _weaponText.GetComponent<RectTransform>().anchorMax = new Vector2(1f,1f);
+        _weaponText.GetComponent<RectTransform>().offsetMin = new Vector2(150f,0f); // Tránh ghi đè chữ bên trái
+        _weaponText.GetComponent<RectTransform>().offsetMax = new Vector2(-15f,0f); // Căn lề phải 15px đối xứng hoàn hảo với lề trái 15px
 
         // Nút Đóng
         GameObject closeBtnObj = new GameObject("CloseButton", typeof(RectTransform));
@@ -350,7 +390,7 @@ public class InventoryUI : MonoBehaviour
         closeRect.anchorMax = new Vector2(0.5f, 0f);
         closeRect.pivot = new Vector2(0.5f, 0f);
         closeRect.anchoredPosition = new Vector2(0f, 15f);
-        closeRect.sizeDelta = new Vector2(110f, 32f);
+        closeRect.sizeDelta = new Vector2(120f, 35f);
 
         Image closeImg = closeBtnObj.AddComponent<Image>();
         closeImg.color = new Color(0.65f, 0.15f, 0.15f, 0.9f);
@@ -362,15 +402,13 @@ public class InventoryUI : MonoBehaviour
         closeTextObj.transform.SetParent(closeBtnObj.transform, false);
         TextMeshProUGUI closeTxt = closeTextObj.AddComponent<TextMeshProUGUI>();
         closeTxt.text = "ĐÓNG";
-        closeTxt.fontSize = 12f;
+        closeTxt.fontSize = 14f;
         closeTxt.fontStyle = FontStyles.Bold;
         closeTxt.alignment = TextAlignmentOptions.Center;
         closeTxt.color = Color.white;
-
-        RectTransform closeTextRect = closeTextObj.GetComponent<RectTransform>();
-        closeTextRect.anchorMin = Vector2.zero;
-        closeTextRect.anchorMax = Vector2.one;
-        closeTextRect.sizeDelta = Vector2.zero;
+        closeTextObj.GetComponent<RectTransform>().anchorMin = Vector2.zero;
+        closeTextObj.GetComponent<RectTransform>().anchorMax = Vector2.one;
+        closeTextObj.GetComponent<RectTransform>().sizeDelta = Vector2.zero;
 
         Button closeBtn = closeBtnObj.AddComponent<Button>();
         closeBtn.onClick.AddListener(ToggleInventory);
@@ -390,50 +428,41 @@ public class InventoryUI : MonoBehaviour
         }
     }
 
-    private TextMeshProUGUI CreateInventoryRow(GameObject parent, string label, string defaultValue)
+    private TextMeshProUGUI CreateInventoryItem(GameObject parent, string name, string defaultVal)
     {
-        GameObject row = new GameObject("Row_" + label.Replace(":", "").Trim(), typeof(RectTransform));
-        row.transform.SetParent(parent.transform, false);
+        GameObject itemObj = new GameObject("Item_" + name, typeof(RectTransform));
+        itemObj.transform.SetParent(parent.transform, false);
+        
+        Image bg = itemObj.AddComponent<Image>();
+        bg.color = new Color(0.12f, 0.12f, 0.15f, 0.9f);
+        Outline outline = itemObj.AddComponent<Outline>();
+        outline.effectColor = new Color(1.0f, 0.84f, 0f, 0.3f);
+        outline.effectDistance = new Vector2(1f, -1f);
 
-        HorizontalLayoutGroup hor = row.AddComponent<HorizontalLayoutGroup>();
-        hor.childControlWidth = true;
-        hor.childControlHeight = true;
-        hor.childForceExpandWidth = false;
-        hor.childForceExpandHeight = false;
+        // Name
+        GameObject nameObj = new GameObject("Name", typeof(RectTransform));
+        nameObj.transform.SetParent(itemObj.transform, false);
+        RectTransform nameRect = nameObj.GetComponent<RectTransform>();
+        nameRect.anchorMin = new Vector2(0, 0); nameRect.anchorMax = new Vector2(1, 1);
+        nameRect.offsetMin = new Vector2(15, 0); nameRect.offsetMax = new Vector2(-60, 0);
+        TextMeshProUGUI nameTxt = nameObj.AddComponent<TextMeshProUGUI>();
+        nameTxt.text = name; nameTxt.fontSize = 13; 
+        nameTxt.alignment = TextAlignmentOptions.MidlineLeft; // Căn giữa dọc + lề trái
+        nameTxt.color = new Color(0.85f, 0.85f, 0.9f, 1f);
 
-        GameObject labelObj = new GameObject("Label", typeof(RectTransform));
-        labelObj.transform.SetParent(row.transform, false);
-        TextMeshProUGUI labelTxt = labelObj.AddComponent<TextMeshProUGUI>();
-        labelTxt.text = label;
-        labelTxt.fontSize = 14f;
-        labelTxt.alignment = TextAlignmentOptions.Left;
-        labelTxt.color = new Color(0.8f, 0.8f, 0.85f, 1f);
-
+        // Value
         GameObject valObj = new GameObject("Value", typeof(RectTransform));
-        valObj.transform.SetParent(row.transform, false);
+        valObj.transform.SetParent(itemObj.transform, false);
+        RectTransform valRect = valObj.GetComponent<RectTransform>();
+        valRect.anchorMin = new Vector2(1, 0); valRect.anchorMax = new Vector2(1, 1);
+        valRect.sizeDelta = new Vector2(60, 0); 
+        valRect.anchoredPosition = new Vector2(-40, 0); // Dịch chuyển sang trái 40px để tránh đè viền
         TextMeshProUGUI valTxt = valObj.AddComponent<TextMeshProUGUI>();
-        valTxt.text = defaultValue;
-        valTxt.fontSize = 14f;
-        valTxt.fontStyle = FontStyles.Bold;
-        valTxt.alignment = TextAlignmentOptions.Right;
-        valTxt.color = Color.white;
+        valTxt.text = defaultVal; valTxt.fontSize = 15; valTxt.fontStyle = FontStyles.Bold; 
+        valTxt.alignment = TextAlignmentOptions.MidlineRight; // Căn giữa dọc + lề phải
+        valTxt.color = new Color(1f, 0.84f, 0f, 1f);
 
         return valTxt;
-    }
-
-    private void AssignPanelTexts()
-    {
-        Transform content = _inventoryPanel.transform.Find("Content");
-        if (content != null)
-        {
-            _copperText = content.Find("Row_Row_🔸 Đồng (Copper)")?.Find("Value")?.GetComponent<TextMeshProUGUI>();
-            _tinText = content.Find("Row_Row_⚪ Thiếc (Tin)")?.Find("Value")?.GetComponent<TextMeshProUGUI>();
-            _turtleShellText = content.Find("Row_Row_🐢 Mai Linh Quy (Shell)")?.Find("Value")?.GetComponent<TextMeshProUGUI>();
-            _bronzeIngotText = content.Find("Row_Row_⭐ Thỏi Đồng Thau (Bronze)")?.Find("Value")?.GetComponent<TextMeshProUGUI>();
-            _spiritualStoneText = content.Find("Row_Row_💎 Đá Linh Khí (Stone)")?.Find("Value")?.GetComponent<TextMeshProUGUI>() ??
-                                  content.Find("Row_💎 Đá Linh Khí (Stone)")?.Find("Value")?.GetComponent<TextMeshProUGUI>();
-            _weaponText = content.Find("Row_Row_⚔️ Vũ khí hiện tại")?.Find("Value")?.GetComponent<TextMeshProUGUI>();
-        }
     }
 
     public void ToggleInventory()
@@ -470,6 +499,8 @@ public class InventoryUI : MonoBehaviour
             if (_turtleShellText != null) _turtleShellText.text = _stats.turtleShell.ToString();
             if (_bronzeIngotText != null) _bronzeIngotText.text = _stats.bronzeIngot.ToString();
             if (_spiritualStoneText != null) _spiritualStoneText.text = _stats.spiritualStone.ToString();
+            if (_magicCrystalText != null) _magicCrystalText.text = _stats.magicCrystal.ToString();
+            if (_darkCrystalText != null) _darkCrystalText.text = _stats.darkCrystal.ToString();
         }
 
         if (_playerMovement != null)

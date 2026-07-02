@@ -45,6 +45,7 @@ public class BlacksmithUI : MonoBehaviour
     private int _currentTab = 0; // 0: Luyện Kim, 1: Rèn Vũ Khí, 2: Rèn Giáp Trụ
     private int _selectedRecipeIndex = 0;
     private bool _isWorking = false;
+    private bool _uiInitialized = false;
 
     private PlayerStats _stats;
     private PlayerMovement _playerMovement;
@@ -87,7 +88,10 @@ public class BlacksmithUI : MonoBehaviour
         SetupReferences();
         LoadWeaponPrefabs();
         InitializeRecipes();
-        SetupUI();
+        if (!_uiInitialized)
+        {
+            SetupUI();
+        }
     }
 
     private void SetupReferences()
@@ -290,6 +294,10 @@ public class BlacksmithUI : MonoBehaviour
         if (_isOpen)
         {
             SetupReferences();
+            if (!_uiInitialized)
+            {
+                SetupUI();
+            }
             SwitchTab(0); // Mặc định mở tab Luyện Kim
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
@@ -337,7 +345,7 @@ public class BlacksmithUI : MonoBehaviour
         GameObject titleObj = new GameObject("Title", typeof(RectTransform));
         titleObj.transform.SetParent(_mainPanel.transform, false);
         _titleText = titleObj.AddComponent<TextMeshProUGUI>();
-        _titleText.text = "⚒️ LÒ RÈN CỔ LOA THÀNH ⚒️";
+        _titleText.text = "- LÒ RÈN CỔ LOA THÀNH -";
         _titleText.fontSize = 18f;
         _titleText.fontStyle = FontStyles.Bold;
         _titleText.color = new Color(1f, 0.84f, 0f);
@@ -559,6 +567,8 @@ public class BlacksmithUI : MonoBehaviour
         ccb.highlightedColor = new Color(0.8f, 0.2f, 0.2f, 0.95f);
         _btnClose.colors = ccb;
         _btnClose.onClick.AddListener(CloseUI);
+
+        _uiInitialized = true;
     }
 
     private Button CreateTabButton(GameObject parent, string name, string label, float anchorMinX, float anchorMaxX)

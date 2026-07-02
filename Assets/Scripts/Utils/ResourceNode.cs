@@ -31,6 +31,8 @@ public class ResourceNode : MonoBehaviour
         if (!other.CompareTag("Player")) return;
 
         PlayerController pc = other.GetComponent<PlayerController>();
+        if (pc == null) pc = other.GetComponentInParent<PlayerController>();
+        if (pc == null) pc = FindAnyObjectByType<PlayerController>();
         if (pc == null || pc.stats == null) return;
 
         int amountGained = amount;

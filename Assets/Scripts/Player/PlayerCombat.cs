@@ -44,7 +44,7 @@ public class PlayerCombat : MonoBehaviour, IDamageable
             }
         }
 
-        if (stats != null && currentHealth < stats.EffectiveMaxHealth)
+        if (stats != null && stats.stamina < stats.maxStamina)
         {
             stats.stamina += stats.staminaRegen * Time.deltaTime;
             stats.stamina = Mathf.Min(stats.stamina, stats.maxStamina);

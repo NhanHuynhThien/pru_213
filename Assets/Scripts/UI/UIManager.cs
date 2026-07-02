@@ -677,6 +677,21 @@ public class UIManager : MonoBehaviour
             }
         }
         comp = parent.GetComponentInChildren<T>(true);
+        if (comp != null && typeof(T) == typeof(TextMeshProUGUI))
+        {
+            // Bỏ qua nếu chữ này thuộc về bất kỳ Button (nút bấm) nào trong UI
+            if (comp.GetComponentInParent<Button>() != null)
+            {
+                return null;
+            }
+
+            string goName = comp.gameObject.name.ToLower();
+            string parentName = comp.transform.parent != null ? comp.transform.parent.name.ToLower() : "";
+            if (goName.Contains("menu") || parentName.Contains("menu") || goName.Contains("btn") || parentName.Contains("btn") || goName.Contains("button") || parentName.Contains("button") || goName.Contains("close") || parentName.Contains("close"))
+            {
+                return null;
+            }
+        }
         return comp;
     }
 }

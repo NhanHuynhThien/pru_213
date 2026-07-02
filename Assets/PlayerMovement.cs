@@ -42,9 +42,97 @@ public class PlayerMovement : MonoBehaviour
 
     private void Start()
     {
-        _characterController = GetComponent<CharacterController>();
-        _animator = GetComponentInChildren<Animator>();
+        // 1. Xác định đối tượng gốc "Player" và con model
+        Transform rootPlayer = transform;
+        if (transform.parent != null && (transform.parent.name == "Player" || transform.parent.CompareTag("Player")))
+        {
+            rootPlayer = transform.parent;
+        }
+
+        // 2. Tìm model con (tripo_convert...)
+        Transform modelChild = null;
+        foreach (Transform child in rootPlayer)
+        {
+            if (child.name.StartsWith("tripo_convert"))
+            {
+                modelChild = child;
+                break;
+            }
+        }
+
+        // 3. Thực hiện dọn dẹp và đồng bộ cấu trúc Player chuẩn
+        if (modelChild != null)
+        {
+            // Lấy vị trí và góc quay hiện tại của con trong Editor để dời cha tới đó
+            Vector3 worldPos = modelChild.position;
+            Quaternion worldRot = modelChild.rotation;
+
+            // Tạm thời lấy các component từ con qua cha nếu cha bị thiếu
+            PlayerController childPC = modelChild.GetComponent<PlayerController>();
+            if (childPC != null)
+            {
+                PlayerController parentPC = rootPlayer.GetComponent<PlayerController>();
+                if (parentPC == null)
+                {
+                    parentPC = rootPlayer.gameObject.AddComponent<PlayerController>();
+                    parentPC.stats = childPC.stats;
+                    parentPC.cameraTransform = childPC.cameraTransform;
+                    parentPC.animator = childPC.animator;
+                }
+                DestroyImmediate(childPC);
+            }
+
+            // Xóa CharacterController dư thừa trên con để tránh xung đột vật lý
+            CharacterController childCC = modelChild.GetComponent<CharacterController>();
+            if (childCC != null)
+            {
+                DestroyImmediate(childCC);
+            }
+
+            // Dịch chuyển cha tới đúng vị trí thế giới của con đặt trong Editor
+            CharacterController parentCC = rootPlayer.GetComponent<CharacterController>();
+            if (parentCC != null) parentCC.enabled = false;
+            
+            rootPlayer.position = worldPos;
+            rootPlayer.rotation = worldRot;
+
+            // Đưa model con về đúng vị trí gốc (0,0,0) của cha
+            modelChild.localPosition = Vector3.zero;
+            modelChild.localRotation = Quaternion.identity;
+
+            if (parentCC != null) parentCC.enabled = true;
+        }
+
+        // 4. Thiết lập cho cha (root Player) làm đối tượng di chuyển chính
+        _characterController = rootPlayer.GetComponent<CharacterController>();
+        if (_characterController == null)
+        {
+            _characterController = rootPlayer.gameObject.AddComponent<CharacterController>();
+            _characterController.height = 2f;
+            _characterController.radius = 0.5f;
+        }
+
+        _animator = rootPlayer.GetComponentInChildren<Animator>();
         EquipWeapon();
+
+        // Đảm bảo tốc độ di chuyển không bị bằng 0
+        if (_movementSpeed <= 0.1f) _movementSpeed = 5f;
+
+        // Cập nhật target cho CameraController để camera follow cha thay vì con
+        CameraController camCtrl = FindAnyObjectByType<CameraController>();
+        if (camCtrl != null)
+        {
+            camCtrl.playerTransform = rootPlayer;
+        }
+
+        // Đảm bảo nhân vật có Rigidbody để nhận biết các sự kiện OnTrigger va chạm nhặt đồ
+        Rigidbody rb = GetComponent<Rigidbody>();
+        if (rb == null)
+        {
+            rb = gameObject.AddComponent<Rigidbody>();
+            rb.isKinematic = true;
+            rb.useGravity = false;
+        }
     }
 
     private void Update()
@@ -61,9 +149,11 @@ public class PlayerMovement : MonoBehaviour
             _velocity.y = -2f; // Snaps the character to the ground
         }
 
-        // Kiểm tra xem chuột có đang tương tác với UI hoặc UI đang mở không
+        // HỢP NHẤT logic: Kiểm tra cả trạng thái mở khóa chuột VÀ các panel UI đang hiển thị
+        bool isCursorUnlocked = Cursor.lockState != CursorLockMode.Locked;
         bool isPointerOverUI = UnityEngine.EventSystems.EventSystem.current != null && 
                                UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject();
+                               
         bool isUIOpen = (InventoryUI.Instance != null && InventoryUI.Instance.IsOpen) ||
                         (BlacksmithUI.Instance != null && BlacksmithUI.Instance.IsOpen) ||
                         (UIManager.Instance != null && (
@@ -74,8 +164,9 @@ public class PlayerMovement : MonoBehaviour
                             (UIManager.Instance.characterStatsPanel != null && UIManager.Instance.characterStatsPanel.activeSelf)
                         ));
 
-        bool blockAttack = isPointerOverUI || isUIOpen || _wasUIOpenLastFrame;
-        _wasUIOpenLastFrame = isUIOpen;
+        // Nếu chuột đang mở khóa, HOẶC trỏ trên UI, HOẶC UI đang bật -> Khóa đòn đánh
+        bool blockAttack = isCursorUnlocked || isPointerOverUI || isUIOpen || _wasUIOpenLastFrame;
+        _wasUIOpenLastFrame = isCursorUnlocked || isUIOpen || isPointerOverUI;
 
         // Đòn đánh (Chuột trái hoặc phím F)
         if (!blockAttack && (Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.F)) && !_isAttacking && _attackCooldownTimer <= 0f)
@@ -105,7 +196,6 @@ public class PlayerMovement : MonoBehaviour
             _velocity.y += _gravity * Time.deltaTime;
             if (_velocity.y < -25f) _velocity.y = -25f; // Giới hạn vận tốc rơi để không bị xuyên tường
         }
-        // _characterController.Move(_velocity * Time.deltaTime);
     }
 
     private void HandleMovementAndRotation()
@@ -127,6 +217,7 @@ public class PlayerMovement : MonoBehaviour
             camRight.Normalize();
         }
 
+        // Calculate direction relative to camera facing direction
         Vector3 move = camRight * x + camForward * z;
         if (move.sqrMagnitude > 1f)
         {
@@ -294,34 +385,58 @@ public class PlayerMovement : MonoBehaviour
             
             Debug.Log($"<color=gold>[Loot]</color> Bạn đã nhặt thành công vật phẩm: <b>{loot.itemName}</b>!");
             
+            // Phát âm thanh nhặt đồ
+            AudioManager.Instance?.PlayPickupSound();
+            
             PlayerController pc = GetComponent<PlayerController>();
+            if (pc == null) pc = FindAnyObjectByType<PlayerController>();
+            
             if (pc != null && pc.stats != null)
             {
                 string nameLower = loot.itemName.ToLower();
+                bool isMaterial = false;
+
                 if (nameLower.Contains("thiếc") || nameLower.Contains("ruda") || nameLower.Contains("tin"))
                 {
                     pc.stats.tinCount += 1;
                     Debug.Log($"<color=gold>[Hệ thống]</color> +1 Thiếc! Tổng số Thiếc hiện có: {pc.stats.tinCount}");
+                    isMaterial = true;
                 }
                 else if (nameLower.Contains("đồng thau") || nameLower.Contains("ingot") || nameLower.Contains("thỏi") || nameLower.Contains("thoi"))
                 {
                     pc.stats.bronzeIngot += 1;
                     Debug.Log($"<color=gold>[Hệ thống]</color> +1 Thỏi Đồng Thau! Tổng số hiện có: {pc.stats.bronzeIngot}");
+                    isMaterial = true;
                 }
-                else if (nameLower.Contains("linh khí") || nameLower.Contains("linh khi") || nameLower.Contains("stone") || nameLower.Contains("crystal"))
+                else if (nameLower.Contains("tử ma thạch") || nameLower.Contains("magic_crystal") || nameLower.Contains("linh khí tím") || nameLower.Contains("magic_crystals"))
+                {
+                    pc.stats.magicCrystal += 1;
+                    Debug.Log($"<color=gold>[Hệ thống]</color> +1 Tử Ma Thạch! Tổng số hiện có: {pc.stats.magicCrystal}");
+                    isMaterial = true;
+                }
+                else if (nameLower.Contains("hắc ám") || nameLower.Contains("black_crystal") || nameLower.Contains("dark_crystal") || nameLower.Contains("crystals") || nameLower.Contains("linh khí đen"))
+                {
+                    pc.stats.darkCrystal += 1;
+                    Debug.Log($"<color=gold>[Hệ thống]</color> +1 Hắc Ám Tinh Thể! Tổng số hiện có: {pc.stats.darkCrystal}");
+                    isMaterial = true;
+                }
+                else if (nameLower.Contains("linh khí") || nameLower.Contains("linh khi") || nameLower.Contains("stone") || nameLower.Contains("crystal") || nameLower.Contains("lưu ly"))
                 {
                     pc.stats.spiritualStone += 1;
-                    Debug.Log($"<color=gold>[Hệ thống]</color> +1 Đá Linh Khí! Tổng số hiện có: {pc.stats.spiritualStone}");
+                    Debug.Log($"<color=gold>[Hệ thống]</color> +1 Ngọc Lưu Ly! Tổng số hiện có: {pc.stats.spiritualStone}");
+                    isMaterial = true;
                 }
                 else if (nameLower.Contains("đồng") || nameLower.Contains("metal") || nameLower.Contains("copper") || nameLower.Contains("ore"))
                 {
                     pc.stats.copperCount += 5;
                     Debug.Log($"<color=gold>[Hệ thống]</color> +5 Đồng! Tổng số Đồng hiện có: {pc.stats.copperCount}");
+                    isMaterial = true;
                 }
                 else if (nameLower.Contains("mai") || nameLower.Contains("shell") || nameLower.Contains("rùa"))
                 {
                     pc.stats.turtleShell += 1;
                     Debug.Log($"<color=gold>[Hệ thống]</color> +1 Mai Linh Quy! Tổng số hiện có: {pc.stats.turtleShell}");
+                    isMaterial = true;
                 }
                 else
                 {
@@ -334,6 +449,13 @@ public class PlayerMovement : MonoBehaviour
                     {
                         EquipWeapon();
                     }
+                }
+
+                // Giảm 5 thể lực (mana) và hiện chữ nổi màu xanh nếu là nguyên liệu
+                if (isMaterial)
+                {
+                    pc.stats.stamina = Mathf.Max(0f, pc.stats.stamina - 5f);
+                    DamagePopup.Create(transform.position + Vector3.up * 1.3f, "-5 Thể lực", new Color(0.2f, 0.6f, 1f));
                 }
             }
             else

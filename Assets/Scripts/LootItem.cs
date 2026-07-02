@@ -35,15 +35,20 @@ public class LootItem : MonoBehaviour
     private void Start()
     {
         spawnTime = Time.time;
+
+        // Tự động thêm BoxCollider làm Trigger nhặt đồ với kích thước chuẩn trong thế giới thực là 1.5m
+        // (Khử hoàn toàn việc Scale của GameObject quá nhỏ như 0.08 làm cho Trigger thu bé lại)
+        BoxCollider pickupTrigger = gameObject.AddComponent<BoxCollider>();
+        Vector3 worldScale = transform.lossyScale;
+        float targetWorldSize = 1.5f;
+        float localX = worldScale.x > 0.001f ? (targetWorldSize / worldScale.x) : targetWorldSize;
+        float localY = worldScale.y > 0.001f ? (targetWorldSize / worldScale.y) : targetWorldSize;
+        float localZ = worldScale.z > 0.001f ? (targetWorldSize / worldScale.z) : targetWorldSize;
+        pickupTrigger.size = new Vector3(localX, localY, localZ);
+        pickupTrigger.center = Vector3.zero;
+        pickupTrigger.isTrigger = true;
+
         colliders = GetComponentsInChildren<Collider>();
-        
-        // Đảm bảo luôn có ít nhất 1 collider để nhặt
-        if (colliders == null || colliders.Length == 0)
-        {
-            BoxCollider box = gameObject.AddComponent<BoxCollider>();
-            box.size = new Vector3(1.5f, 1.5f, 1.5f);
-            colliders = new Collider[] { box };
-        }
 
         rb = GetComponentInChildren<Rigidbody>();
         if (rb != null)
@@ -105,6 +110,10 @@ public class LootItem : MonoBehaviour
         {
             if (c != null)
             {
+                if (c is MeshCollider mc)
+                {
+                    mc.convex = true;
+                }
                 c.isTrigger = isTrigger;
             }
         }
@@ -130,6 +139,7 @@ public class LootItem : MonoBehaviour
             {
                 isPopping = false;
                 isReadyForPickup = true;
+                SetCollidersTrigger(true);
                 
                 // Đặt quặng đứng ở độ cao mặt đất và nhấc lên một tí
                 transform.position = new Vector3(transform.position.x, groundY + 0.3f, transform.position.z);

@@ -75,13 +75,24 @@ public class BlacksmithForge : MonoBehaviour
         // Nhấn E để mở/đóng giao diện khi ở trong vùng tương tác
         if (_isPlayerInRange && Input.GetKeyDown(KeyCode.E))
         {
-            if (BlacksmithUI.Instance != null)
+            BlacksmithUI ui = BlacksmithUI.Instance;
+            if (ui == null)
             {
-                BlacksmithUI.Instance.ToggleUI();
+                ui = FindAnyObjectByType<BlacksmithUI>(FindObjectsInactive.Include);
+                if (ui != null)
+                {
+                    // Đảm bảo UI khởi tạo nếu nó chưa chạy Awake
+                    ui.gameObject.SetActive(true);
+                }
+            }
+
+            if (ui != null)
+            {
+                ui.ToggleUI();
             }
             else
             {
-                Debug.LogWarning("[Lò Rèn] BlacksmithUI.Instance đang bị NULL! Kiểm tra xem UI đã được thiết lập dưới Canvas chưa.");
+                Debug.LogWarning("[Lò Rèn] Không tìm thấy BlacksmithUI trong Scene!");
             }
         }
     }

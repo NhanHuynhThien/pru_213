@@ -76,44 +76,29 @@ public class SceneSetup : MonoBehaviour
 
     void SetupPlayer()
     {
+        // HỢP NHẤT: Tìm theo Tag trước, nếu không thấy thì tìm theo Tên (Logic của bạn)
         GameObject player = GameObject.FindGameObjectWithTag("Player");
+        if (player == null) player = GameObject.Find("Player");
+
         if (player != null)
         {
-            Debug.Log("[SceneSetup] Player already exists in scene. Reusing.");
-            
-            // Setup camera for existing player
-            CameraController cam = Camera.main?.GetComponent<CameraController>();
-            if (cam != null)
-            {
-                cam.playerTransform = player.transform;
-            }
-            else if (Camera.main != null)
-            {
-                CameraController newCam = Camera.main.gameObject.GetComponent<CameraController>();
-                if (newCam == null)
-                {
-                    newCam = Camera.main.gameObject.AddComponent<CameraController>();
-                }
-                newCam.playerTransform = player.transform;
-            }
-
-            UpgradeSystem us = FindObjectOfType<UpgradeSystem>();
-            if (us != null)
-            {
-                us.skinManager = player.GetComponent<SkinManager>();
-            }
-            return;
+            // Nếu đã tìm thấy Player trong Scene, sử dụng luôn Player này và giữ nguyên vị trí đặt trong Editor
+            Debug.Log("[SceneSetup] Phát hiện Player đã có sẵn trong Scene. Sử dụng vị trí đặt trong Editor.");
         }
-
-        if (playerPrefab == null)
+        else
         {
-            Debug.LogWarning("[SceneSetup] Khong tim thay Player Prefab!");
-            return;
+            // Nếu chưa có, mới sinh ra từ Prefab tại điểm Spawn
+            if (playerPrefab == null)
+            {
+                Debug.LogWarning("[SceneSetup] Không tìm thấy Player và không có playerPrefab!");
+                return;
+            }
+            Vector3 spawnPos = playerSpawnPoint != null ? playerSpawnPoint.position : new Vector3(0f, 1f, 0f);
+            player = Instantiate(playerPrefab, spawnPos, Quaternion.identity);
+            Debug.Log("[SceneSetup] Đã sinh Player mới từ Prefab tại điểm Spawn.");
         }
 
-        Vector3 spawnPos = playerSpawnPoint != null ? playerSpawnPoint.position : new Vector3(0f, 1f, 0f);
-        player = Instantiate(playerPrefab, spawnPos, Quaternion.identity);
-
+        // HỢP NHẤT: Xử lý gán Camera follow và chống trùng lắp Component CameraController từ Main
         CameraController camFollow = Camera.main?.GetComponent<CameraController>();
         if (camFollow != null)
         {
@@ -129,7 +114,8 @@ public class SceneSetup : MonoBehaviour
             newCam.playerTransform = player.transform;
         }
 
-        UpgradeSystem upgradeSys = FindObjectOfType<UpgradeSystem>();
+        // HỢP NHẤT: Đồng bộ hệ thống SkinManager và dùng hàm tối ưu FindFirstObjectByType của bạn
+        UpgradeSystem upgradeSys = FindFirstObjectByType<UpgradeSystem>();
         if (upgradeSys != null)
         {
             upgradeSys.skinManager = player.GetComponent<SkinManager>();
