@@ -17,6 +17,7 @@ public class DamagePopup : MonoBehaviour, IPooledObject
     private bool isActive = false;
     private RectTransform rectTransform;
     private Canvas parentCanvas;
+    private Vector3 worldPosition;
 
     public static DamagePopup Create(Vector3 position, int damage, bool critical = false)
     {
@@ -38,6 +39,7 @@ public class DamagePopup : MonoBehaviour, IPooledObject
         }
 
         popupObj = new GameObject("DamagePopup", typeof(RectTransform));
+        popupObj.transform.position = position;
         popup = popupObj.AddComponent<DamagePopup>();
         popup.Setup(damage, critical);
         return popup;
@@ -63,6 +65,7 @@ public class DamagePopup : MonoBehaviour, IPooledObject
         }
 
         popupObj = new GameObject("DamagePopup", typeof(RectTransform));
+        popupObj.transform.position = position;
         popup = popupObj.AddComponent<DamagePopup>();
         popup.SetupCustom(customText, color);
         return popup;
@@ -70,6 +73,8 @@ public class DamagePopup : MonoBehaviour, IPooledObject
 
     void SetupCustom(string customText, Color color)
     {
+        worldPosition = transform.position;
+
         if (textMesh == null)
         {
             textMesh = GetComponent<TextMeshProUGUI>();
@@ -86,7 +91,7 @@ public class DamagePopup : MonoBehaviour, IPooledObject
             transform.SetParent(canvas.transform, false);
             if (rectTransform != null)
             {
-                rectTransform.anchoredPosition = WorldToCanvasPosition(canvas, transform.position);
+                rectTransform.anchoredPosition = WorldToCanvasPosition(canvas, worldPosition);
             }
         }
 
@@ -120,6 +125,8 @@ public class DamagePopup : MonoBehaviour, IPooledObject
 
     void Setup(int damage, bool critical)
     {
+        worldPosition = transform.position;
+
         if (textMesh == null)
         {
             textMesh = GetComponent<TextMeshProUGUI>();
@@ -136,7 +143,7 @@ public class DamagePopup : MonoBehaviour, IPooledObject
             transform.SetParent(canvas.transform, false);
             if (rectTransform != null)
             {
-                rectTransform.anchoredPosition = WorldToCanvasPosition(canvas, transform.position);
+                rectTransform.anchoredPosition = WorldToCanvasPosition(canvas, worldPosition);
             }
         }
 
@@ -177,14 +184,12 @@ public class DamagePopup : MonoBehaviour, IPooledObject
         float elapsed = Time.time - spawnTime;
         float t = elapsed / lifetime;
 
-        Vector3 pos = transform.position;
-        pos += velocity * Time.deltaTime;
+        worldPosition += velocity * Time.deltaTime;
         velocity.y -= 2f * Time.deltaTime;
-        transform.position = pos;
 
         if (parentCanvas != null && rectTransform != null)
         {
-            rectTransform.anchoredPosition = WorldToCanvasPosition(parentCanvas, pos);
+            rectTransform.anchoredPosition = WorldToCanvasPosition(parentCanvas, worldPosition);
         }
 
         if (t > 0.7f)

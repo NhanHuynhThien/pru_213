@@ -32,8 +32,74 @@ public class LootItem : MonoBehaviour
     private float groundY;
     private bool isPopping = false;
 
+
+
     private void Start()
     {
+        // Tự động điều chỉnh vị trí của Kiếm Đồng ở gốc tọa độ/gần người chơi sang trước mặt người chơi 6m và đặt trên mặt đất
+        string nameLower = (itemName != null) ? itemName.ToLower() : "";
+        string goNameLower = gameObject.name.ToLower();
+        if ((nameLower.Contains("bronze") && nameLower.Contains("dagger")) || 
+            (goNameLower.Contains("bronze") && (goNameLower.Contains("dagger") || goNameLower.Contains("dragger"))))
+        {
+            if (Time.frameCount <= 3 || Time.time < 0.3f)
+            {
+                Vector3 playerPos = Vector3.zero;
+                Vector3 playerForward = Vector3.forward;
+                bool foundPlayer = false;
+
+                // 1. Thử tìm từ Player thực tế trong scene (chính xác nhất ở runtime)
+                GameObject player = GameObject.Find("Player");
+                if (player == null) player = GameObject.FindGameObjectWithTag("Player");
+                if (player != null)
+                {
+                    playerPos = player.transform.position;
+                    playerForward = player.transform.forward;
+                    foundPlayer = true;
+                }
+
+                // 2. Thử tìm từ SceneSetup (phương án dự phòng)
+                if (!foundPlayer)
+                {
+                    SceneSetup setup = FindAnyObjectByType<SceneSetup>();
+                    if (setup != null && setup.playerSpawnPoint != null)
+                    {
+                        playerPos = setup.playerSpawnPoint.position;
+                        playerForward = setup.playerSpawnPoint.forward;
+                        foundPlayer = true;
+                    }
+                }
+
+                if (foundPlayer)
+                {
+                    float dist = Vector3.Distance(transform.position, playerPos);
+                    // Nếu quá gần người chơi (dưới 8 mét) hoặc gốc tọa độ
+                    if (dist < 8f || Vector3.Distance(transform.position, Vector3.zero) < 10f)
+                    {
+                        Vector3 spawnForward = playerForward;
+                        if (spawnForward.sqrMagnitude < 0.1f) spawnForward = Vector3.forward;
+                        
+                        // Đặt kiếm ra trước mặt người chơi 6.0 mét
+                        Vector3 targetPos = playerPos + spawnForward * 6.0f;
+                        
+                        // Tìm cao độ mặt đất bên dưới bằng Raycast để đặt kiếm nằm trên mặt đất chuẩn
+                        RaycastHit hit;
+                        if (Physics.Raycast(targetPos + Vector3.up * 2f, Vector3.down, out hit, 15f))
+                        {
+                            targetPos = hit.point + Vector3.up * 0.05f;
+                        }
+                        else
+                        {
+                            targetPos.y = playerPos.y - 0.9f + 0.05f; // Dự phòng bằng chân nhân vật
+                        }
+                        
+                        transform.position = targetPos;
+                        Debug.Log($"[LootItem] Đã chuyển vị trí Bronze Dagger ra trước mặt người chơi 6.0m: {targetPos}");
+                    }
+                }
+            }
+        }
+
         spawnTime = Time.time;
 
         // Tự động thêm BoxCollider làm Trigger nhặt đồ với kích thước chuẩn trong thế giới thực là 1.5m

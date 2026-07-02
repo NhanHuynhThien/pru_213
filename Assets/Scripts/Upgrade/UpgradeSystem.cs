@@ -15,7 +15,7 @@ public class UpgradeSystem : MonoBehaviour
     }
 
     public UpgradeStep currentStep = UpgradeStep.None;
-    public int currentTier = 1;
+    public int currentTier = 0;
 
     [Header("Step Requirements")]
     public int copperForTier2 = 20;
@@ -54,6 +54,11 @@ public class UpgradeSystem : MonoBehaviour
         {
             PlayerController pc = FindObjectOfType<PlayerController>();
             if (pc != null) playerStats = pc.stats;
+        }
+
+        if (playerStats != null)
+        {
+            currentTier = playerStats.currentTier;
         }
     }
 

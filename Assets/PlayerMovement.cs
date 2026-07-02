@@ -101,7 +101,19 @@ public class PlayerMovement : MonoBehaviour
             CharacterController parentCC = rootPlayer.GetComponent<CharacterController>();
             if (parentCC != null) parentCC.enabled = false;
             
-            rootPlayer.position = new Vector3(worldPos.x, worldPos.y - localY, worldPos.z);
+            Vector3 targetPos = new Vector3(worldPos.x, worldPos.y - localY, worldPos.z);
+
+            // Tự động tìm vị trí mặt đất dưới chân để tránh spawn trên mái nhà
+            RaycastHit hit;
+            if (Physics.Raycast(targetPos + Vector3.up * 1f, Vector3.down, out hit, 15f))
+            {
+                if (hit.collider.gameObject != rootPlayer.gameObject && !hit.collider.transform.IsChildOf(rootPlayer))
+                {
+                    targetPos = hit.point;
+                }
+            }
+
+            rootPlayer.position = targetPos;
             rootPlayer.rotation = worldRot;
 
             // Đưa model con về tâm XZ nhưng giữ nguyên độ cao bù trừ Y
@@ -121,7 +133,17 @@ public class PlayerMovement : MonoBehaviour
         }
 
         _animator = rootPlayer.GetComponentInChildren<Animator>();
-        EquipWeapon();
+        
+        PlayerController pc = rootPlayer.GetComponent<PlayerController>();
+        if (pc != null && pc.stats != null && pc.stats.currentTier > 0)
+        {
+            EquipWeapon();
+        }
+        else
+        {
+            Debug.Log("[PlayerMovement] Khởi đầu Tier 0: Không tự động trang bị vũ khí.");
+            _hasSword = false;
+        }
 
         // Đảm bảo tốc độ di chuyển không bị bằng 0
         if (_movementSpeed <= 0.1f) _movementSpeed = 5f;
