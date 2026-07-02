@@ -66,6 +66,14 @@ public class PlayerMovement : MonoBehaviour
             // Lấy vị trí và góc quay hiện tại của con trong Editor để dời cha tới đó
             Vector3 worldPos = modelChild.position;
             Quaternion worldRot = modelChild.rotation;
+            float localY = modelChild.localPosition.y; // Lưu lại độ cao bù trừ để chân chạm đất
+
+            // Xóa PlayerMovement dư thừa trên con trước (để gỡ bỏ dependency với CharacterController)
+            PlayerMovement childPM = modelChild.GetComponent<PlayerMovement>();
+            if (childPM != null && childPM != this)
+            {
+                DestroyImmediate(childPM);
+            }
 
             // Tạm thời lấy các component từ con qua cha nếu cha bị thiếu
             PlayerController childPC = modelChild.GetComponent<PlayerController>();
@@ -89,15 +97,15 @@ public class PlayerMovement : MonoBehaviour
                 DestroyImmediate(childCC);
             }
 
-            // Dịch chuyển cha tới đúng vị trí thế giới của con đặt trong Editor
+            // Dịch chuyển cha tới đúng vị trí thế giới của con (bù trừ độ cao local Y)
             CharacterController parentCC = rootPlayer.GetComponent<CharacterController>();
             if (parentCC != null) parentCC.enabled = false;
             
-            rootPlayer.position = worldPos;
+            rootPlayer.position = new Vector3(worldPos.x, worldPos.y - localY, worldPos.z);
             rootPlayer.rotation = worldRot;
 
-            // Đưa model con về đúng vị trí gốc (0,0,0) của cha
-            modelChild.localPosition = Vector3.zero;
+            // Đưa model con về tâm XZ nhưng giữ nguyên độ cao bù trừ Y
+            modelChild.localPosition = new Vector3(0f, localY, 0f);
             modelChild.localRotation = Quaternion.identity;
 
             if (parentCC != null) parentCC.enabled = true;

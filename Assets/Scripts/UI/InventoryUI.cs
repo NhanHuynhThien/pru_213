@@ -290,7 +290,7 @@ public class InventoryUI : MonoBehaviour
         rect.anchorMin = new Vector2(0.5f, 0.5f);
         rect.anchorMax = new Vector2(0.5f, 0.5f);
         rect.pivot = new Vector2(0.5f, 0.5f);
-        rect.sizeDelta = new Vector2(500f, 450f); // Tăng chiều cao lên 450 để chứa đủ 4 hàng
+        rect.sizeDelta = new Vector2(500f, 370f); // Thu nhỏ chiều cao từ 450 xuống 370 cho vừa khít 3 hàng và vũ khí
 
         // Nền tối mờ cao cấp
         Image bgImg = _inventoryPanel.AddComponent<Image>();
@@ -333,7 +333,7 @@ public class InventoryUI : MonoBehaviour
         RectTransform gridRect = gridObj.GetComponent<RectTransform>();
         gridRect.anchorMin = new Vector2(0f, 0f);
         gridRect.anchorMax = new Vector2(1f, 1f);
-        gridRect.offsetMin = new Vector2(30f, 110f); // Tăng lề dưới để chừa chỗ cho vũ khí
+        gridRect.offsetMin = new Vector2(30f, 95f); // Tối ưu lề dưới vừa khít lưới 3 hàng
         gridRect.offsetMax = new Vector2(-30f, -75f); // Căn lề trái phải 30px cân xứng tuyệt đối
 
         GridLayoutGroup grid = gridObj.AddComponent<GridLayoutGroup>();
@@ -345,7 +345,6 @@ public class InventoryUI : MonoBehaviour
         // Tạo các khối Item (Không dùng icon viết tắt, chỉ dùng nhãn chữ)
         _copperText = CreateInventoryItem(gridObj, "Đồng (Copper)", "0");
         _tinText = CreateInventoryItem(gridObj, "Thiếc (Tin)", "0");
-        _bronzeIngotText = CreateInventoryItem(gridObj, "Thỏi Đồng", "0");
         _turtleShellText = CreateInventoryItem(gridObj, "Mai Linh Quy", "0");
         _spiritualStoneText = CreateInventoryItem(gridObj, "Ngọc Lưu Ly", "0");
         _magicCrystalText = CreateInventoryItem(gridObj, "Tử Ma Thạch", "0");
@@ -357,8 +356,8 @@ public class InventoryUI : MonoBehaviour
         RectTransform wRect = weaponObj.GetComponent<RectTransform>();
         wRect.anchorMin = new Vector2(0.06f, 0f); wRect.anchorMax = new Vector2(0.94f, 0f); // Căn ngang 30px tương đương lưới
         wRect.pivot = new Vector2(0.5f, 0f);
-        wRect.anchoredPosition = new Vector2(0f, 60f); // Đặt cách đáy 60px
-        wRect.sizeDelta = new Vector2(0f, 45f); // Tăng chiều cao lên 45px cho thoáng
+        wRect.anchoredPosition = new Vector2(0f, 50f); // Đặt cách đáy 50px (dịch lên 10px sát lưới)
+        wRect.sizeDelta = new Vector2(0f, 38f); // Kích thước gọn gàng hơn (38px)
         Image wBg = weaponObj.AddComponent<Image>();
         wBg.color = new Color(0.12f, 0.12f, 0.15f, 0.9f);
         Outline wOut = weaponObj.AddComponent<Outline>();
@@ -389,8 +388,8 @@ public class InventoryUI : MonoBehaviour
         closeRect.anchorMin = new Vector2(0.5f, 0f);
         closeRect.anchorMax = new Vector2(0.5f, 0f);
         closeRect.pivot = new Vector2(0.5f, 0f);
-        closeRect.anchoredPosition = new Vector2(0f, 15f);
-        closeRect.sizeDelta = new Vector2(120f, 35f);
+        closeRect.anchoredPosition = new Vector2(0f, 10f); // Đặt cách đáy 10px cho cân đối
+        closeRect.sizeDelta = new Vector2(120f, 30f); // Chiều cao 30px thanh lịch
 
         Image closeImg = closeBtnObj.AddComponent<Image>();
         closeImg.color = new Color(0.65f, 0.15f, 0.15f, 0.9f);
@@ -497,7 +496,6 @@ public class InventoryUI : MonoBehaviour
             if (_copperText != null) _copperText.text = _stats.copperCount.ToString();
             if (_tinText != null) _tinText.text = _stats.tinCount.ToString();
             if (_turtleShellText != null) _turtleShellText.text = _stats.turtleShell.ToString();
-            if (_bronzeIngotText != null) _bronzeIngotText.text = _stats.bronzeIngot.ToString();
             if (_spiritualStoneText != null) _spiritualStoneText.text = _stats.spiritualStone.ToString();
             if (_magicCrystalText != null) _magicCrystalText.text = _stats.magicCrystal.ToString();
             if (_darkCrystalText != null) _darkCrystalText.text = _stats.darkCrystal.ToString();

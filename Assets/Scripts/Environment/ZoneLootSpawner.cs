@@ -111,15 +111,22 @@ public class ZoneLootSpawner : MonoBehaviour
                     {
                         // Sinh loot tại groundPos với Y offset bù trừ
                         Vector3 finalPos = new Vector3(groundPos.x, groundPos.y + config.customYOffset, groundPos.z);
-                        
+                        GameObject lootObj;
+                        if (Application.isPlaying)
+                        {
+                            lootObj = Instantiate(config.templateObject, finalPos, Quaternion.Euler(0, Random.Range(0f, 360f), 0));
+                        }
+                        else
+                        {
 #if UNITY_EDITOR
-                        GameObject lootObj = (GameObject)PrefabUtility.InstantiatePrefab(config.templateObject);
-                        lootObj.transform.position = finalPos;
-                        lootObj.transform.rotation = Quaternion.Euler(0, Random.Range(0f, 360f), 0);
-                        Undo.RegisterCreatedObjectUndo(lootObj, "Scatter Loot Item");
+                            lootObj = (GameObject)PrefabUtility.InstantiatePrefab(config.templateObject);
+                            lootObj.transform.position = finalPos;
+                            lootObj.transform.rotation = Quaternion.Euler(0, Random.Range(0f, 360f), 0);
+                            Undo.RegisterCreatedObjectUndo(lootObj, "Scatter Loot Item");
 #else
-                        GameObject lootObj = Instantiate(config.templateObject, finalPos, Quaternion.Euler(0, Random.Range(0f, 360f), 0));
+                            lootObj = Instantiate(config.templateObject, finalPos, Quaternion.Euler(0, Random.Range(0f, 360f), 0));
 #endif
+                        }
                         
                         lootObj.name = config.templateObject.name.Replace("(Clone)", "").Trim() + "_" + spawnedCount;
                         lootObj.transform.SetParent(holder.transform);
@@ -155,6 +162,7 @@ public class ZoneLootSpawner : MonoBehaviour
         {
             if (Application.isPlaying)
             {
+                holder.name = "_DELETED_HOLDER_";
                 Destroy(holder);
             }
             else

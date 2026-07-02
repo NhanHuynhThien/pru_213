@@ -27,6 +27,28 @@ public class SceneSetup : MonoBehaviour
 
     void Start()
     {
+        // Chẩn đoán địa hình (Terrain) và các thực thể khác
+        GameObject terrainGO = GameObject.Find("Terrain");
+        if (terrainGO == null) terrainGO = GameObject.FindObjectOfType<Terrain>()?.gameObject;
+        
+        if (terrainGO != null)
+        {
+            Debug.Log($"[DIAGNOSTIC] Tìm thấy Terrain: Active={terrainGO.activeSelf}, ActiveInHierarchy={terrainGO.activeInHierarchy}, Vị trí={terrainGO.transform.position}");
+            TerrainCollider tc = terrainGO.GetComponent<TerrainCollider>();
+            Debug.Log($"[DIAGNOSTIC] TerrainCollider: {(tc != null ? "Có" : "Không")}, Enabled={(tc != null ? tc.enabled.ToString() : "N/A")}");
+        }
+        else
+        {
+            Debug.LogWarning("[DIAGNOSTIC] Không tìm thấy đối tượng Terrain nào trong cảnh!");
+        }
+
+        PlayerMovement[] allPMs = FindObjectsByType<PlayerMovement>(FindObjectsSortMode.None);
+        Debug.Log($"[DIAGNOSTIC] Số lượng PlayerMovement trong Scene: {allPMs.Length}");
+        foreach (var pm in allPMs)
+        {
+            Debug.Log($"[DIAGNOSTIC] PlayerMovement nằm trên GameObject: {pm.gameObject.name}, Vị trí={pm.transform.position}");
+        }
+
         SetupPlayer();
         SetupSpawners();
     }

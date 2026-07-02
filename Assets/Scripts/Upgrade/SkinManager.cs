@@ -69,13 +69,20 @@ public class SkinManager : MonoBehaviour
             Animator newAnimator = _currentModel.GetComponentInChildren<Animator>();
             if (newAnimator != null)
             {
-                PlayerController pc = GetComponent<PlayerController>();
+                // Đồng bộ Controller từ Animator cha (tripo_convert...) sang Animator mới để tránh bị T-pose
+                Animator parentAnim = GetComponent<Animator>();
+                if (parentAnim != null && parentAnim.runtimeAnimatorController != null)
+                {
+                    newAnimator.runtimeAnimatorController = parentAnim.runtimeAnimatorController;
+                }
+
+                PlayerController pc = GetComponentInParent<PlayerController>();
                 if (pc != null) pc.animator = newAnimator;
 
-                PlayerCombat combat = GetComponent<PlayerCombat>();
+                PlayerCombat combat = GetComponentInParent<PlayerCombat>();
                 if (combat != null) combat.animator = newAnimator;
 
-                PlayerMovement pm = GetComponent<PlayerMovement>();
+                PlayerMovement pm = GetComponentInParent<PlayerMovement>();
                 if (pm != null) pm.SetAnimator(newAnimator);
             }
 
@@ -91,7 +98,7 @@ public class SkinManager : MonoBehaviour
 
     void UpdatePlayerStats(int tier, SkinBase skin)
     {
-        PlayerController pc = GetComponent<PlayerController>();
+        PlayerController pc = GetComponentInParent<PlayerController>();
         if (pc != null && pc.stats != null)
         {
             pc.stats.ApplyTierBonuses(tier);
@@ -104,7 +111,7 @@ public class SkinManager : MonoBehaviour
                 pc.stats.defense += skin.BonusDefense;
             }
 
-            PlayerCombat combat = GetComponent<PlayerCombat>();
+            PlayerCombat combat = GetComponentInParent<PlayerCombat>();
             if (combat != null)
             {
                 combat.currentHealth = pc.stats.EffectiveMaxHealth;
