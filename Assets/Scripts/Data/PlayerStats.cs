@@ -9,8 +9,8 @@ public class PlayerStats : ScriptableObject
     public int playerID;
 
     [Header("Tier & Class")]
-    public int currentTier = 1;
-    public string tierName = "Gap Cham";
+    public int currentTier = 0;
+    public string tierName = "Mặc định";
     public string className = "Nghệ Nhân";
 
     [Header("Base Stats")]
@@ -51,6 +51,11 @@ public class PlayerStats : ScriptableObject
     public int EffectiveAttackDamage => Mathf.RoundToInt(attackDamage * (1f + tierDamageBonus));
     public float EffectiveDefense => defense * (1f + tierDefenseBonus);
 
+    private void OnEnable()
+    {
+        ApplyTierBonuses(0);
+    }
+
     public void Reset()
     {
         currentHealth = EffectiveMaxHealth;
@@ -59,33 +64,53 @@ public class PlayerStats : ScriptableObject
 
     public void ApplyTierBonuses(int tier)
     {
+        Debug.Log($"[PlayerStats] ApplyTierBonuses gọi với tier: {tier}. StackTrace: {System.Environment.StackTrace}");
         currentTier = tier;
+        
+        // Reset base stats to prevent permanent accumulation
+        maxHealth = 100;
+        attackDamage = 15f;
+        defense = 0f;
+        moveSpeed = 5f;
+        
+        tierHealthBonus = 0f;
+        tierDamageBonus = 0f;
+        tierDefenseBonus = 0f;
+        canSummonArrows = false;
+
         switch (tier)
         {
+            case 0:
+                tierName = "Mặc định";
+                // Sát thương: 15, Phòng thủ: 0
+                break;
             case 1:
                 tierName = "Giáp Chàm";
-                tierHealthBonus = 0f;
-                tierDamageBonus = 0f;
-                tierDefenseBonus = 0f;
+                // Sát thương: 35, Phòng thủ: 5
+                attackDamage = 35f;
+                defense = 5f;
                 break;
             case 2:
                 tierName = "Giáp Đồng";
+                // Sát thương: 55, Phòng thủ: 15
+                attackDamage = 55f;
+                defense = 15f;
                 tierHealthBonus = 50f;
-                tierDamageBonus = 0.15f;
-                tierDefenseBonus = 0.1f;
                 break;
             case 3:
                 tierName = "Giáp Linh Quy";
+                // Sát thương: 85, Phòng thủ: 30
+                attackDamage = 85f;
+                defense = 30f;
                 tierHealthBonus = 120f;
-                tierDamageBonus = 0.3f;
-                tierDefenseBonus = 0.25f;
                 canSummonArrows = true;
                 break;
             case 4:
                 tierName = "Thần Vương";
+                // Sát thương: 150, Phòng thủ: 60
+                attackDamage = 150f;
+                defense = 60f;
                 tierHealthBonus = 250f;
-                tierDamageBonus = 0.5f;
-                tierDefenseBonus = 0.4f;
                 canSummonArrows = true;
                 break;
         }

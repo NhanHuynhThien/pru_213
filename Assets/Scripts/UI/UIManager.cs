@@ -6,6 +6,42 @@ public class UIManager : MonoBehaviour
 {
     public static UIManager Instance { get; private set; }
 
+    private string _notificationText = "";
+    private float _notificationTimer = 0f;
+    private Color _notificationColor = Color.yellow;
+
+    public void ShowNotification(string message, float duration = 5f, Color? color = null)
+    {
+        _notificationText = message;
+        _notificationTimer = duration;
+        _notificationColor = color ?? new Color(1f, 0.84f, 0f);
+    }
+
+    void OnGUI()
+    {
+        if (_notificationTimer > 0f && !string.IsNullOrEmpty(_notificationText))
+        {
+            GUIStyle style = new GUIStyle();
+            style.fontSize = 22;
+            style.fontStyle = FontStyle.Bold;
+            style.alignment = TextAnchor.MiddleCenter;
+
+            float x = Screen.width / 2 - 400;
+            float y = 50;
+            float w = 800;
+            float h = 40;
+
+            // Bóng đổ chữ đen
+            style.normal.textColor = Color.black;
+            GUI.Label(new Rect(x + 1, y + 1, w, h), _notificationText, style);
+            GUI.Label(new Rect(x - 1, y - 1, w, h), _notificationText, style);
+
+            // Chữ chính
+            style.normal.textColor = _notificationColor;
+            GUI.Label(new Rect(x, y, w, h), _notificationText, style);
+        }
+    }
+
     [Header("Canvas References")]
     public Canvas mainCanvas;
     public GameObject HUDPanel;
@@ -161,6 +197,14 @@ public class UIManager : MonoBehaviour
         if (HUDPanel != null) HUDPanel.SetActive(true);
 
         FindPlayerReferences();
+        if (playerStats != null)
+        {
+            Debug.Log($"[UIManager DEBUG] playerStats: {playerStats.name}, InstanceID: {playerStats.GetInstanceID()}, Tier: {playerStats.currentTier}, Dmg: {playerStats.EffectiveAttackDamage}");
+        }
+        else
+        {
+            Debug.Log("[UIManager DEBUG] playerStats is NULL!");
+        }
         AutoFindUIReferences();
         EnsureBossHealthUIExists();
         BindStatsPanelEvents();
@@ -286,20 +330,40 @@ public class UIManager : MonoBehaviour
 
     void Update()
     {
+        if (_notificationTimer > 0f)
+        {
+            _notificationTimer -= Time.deltaTime;
+        }
         UpdateHUD();
     }
 
     void FindPlayerReferences()
     {
-        if (playerCombat == null)
+        PlayerController[] pcs = FindObjectsByType<PlayerController>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        Debug.Log($"[UIManager DEBUG] Tìm thấy {pcs.Length} PlayerController trong Scene!");
+        
+        PlayerController activePlayer = null;
+        foreach (var pc in pcs)
         {
-            GameObject player = GameObject.FindGameObjectWithTag("Player");
-            if (player != null)
+            if (pc != null)
             {
-                playerCombat = player.GetComponent<PlayerCombat>();
-                PlayerController pc = player.GetComponent<PlayerController>();
-                if (pc != null) playerStats = pc.stats;
+                Debug.Log($"  - GameObject: {pc.gameObject.name}, Active: {pc.gameObject.activeInHierarchy}, Stats: {(pc.stats != null ? pc.stats.name : "NULL")}, Tier: {(pc.stats != null ? pc.stats.currentTier.ToString() : "N/A")}");
+                if (pc.gameObject.activeInHierarchy)
+                {
+                    activePlayer = pc;
+                }
             }
+        }
+
+        if (activePlayer != null)
+        {
+            playerCombat = activePlayer.GetComponent<PlayerCombat>();
+            playerStats = activePlayer.stats;
+        }
+        else if (pcs.Length > 0 && pcs[0] != null)
+        {
+            playerCombat = pcs[0].GetComponent<PlayerCombat>();
+            playerStats = pcs[0].stats;
         }
 
         if (enemySpawner == null)
@@ -353,6 +417,23 @@ public class UIManager : MonoBehaviour
 
     void UpdateHUD()
     {
+        if (playerCombat == null || playerStats == null)
+        {
+            FindPlayerReferences();
+        }
+        else
+        {
+            GameObject player = GameObject.FindGameObjectWithTag("Player");
+            if (player != null)
+            {
+                PlayerController pc = player.GetComponent<PlayerController>();
+                if (pc != null && playerStats != pc.stats)
+                {
+                    playerStats = pc.stats;
+                }
+            }
+        }
+
         if (playerCombat != null && playerStats != null)
         {
             float healthPercent = playerCombat.GetHealthPercent();
@@ -370,7 +451,27 @@ public class UIManager : MonoBehaviour
         }
 
         if (tierText != null && playerStats != null)
+        {
             tierText.text = $"Tier {playerStats.currentTier} - {playerStats.tierName}";
+
+            // Tự động kéo rộng khung chữ và khung nền (Parent) cho vừa khít với chữ để tránh bị cắt/tràn
+            RectTransform textRect = tierText.rectTransform;
+            if (textRect != null)
+            {
+                textRect.sizeDelta = new Vector2(tierText.preferredWidth + 10f, textRect.sizeDelta.y);
+            }
+
+            RectTransform parentRect = tierText.transform.parent as RectTransform;
+            if (parentRect != null && parentRect.gameObject != HUDPanel && parentRect.gameObject != mainCanvas.gameObject)
+            {
+                // Chỉ kéo giãn nếu parent thực sự là khung chứa (ví dụ có Image component hoặc tên phù hợp)
+                if (parentRect.GetComponent<Image>() != null || parentRect.name.ToLower().Contains("tier") || parentRect.name.ToLower().Contains("panel") || parentRect.name.ToLower().Contains("bg"))
+                {
+                    float requiredWidth = tierText.preferredWidth + 40f;
+                    parentRect.sizeDelta = new Vector2(requiredWidth, parentRect.sizeDelta.y);
+                }
+            }
+        }
 
         if (tierNameText != null && playerStats != null)
             tierNameText.text = playerStats.tierName;
@@ -425,9 +526,26 @@ public class UIManager : MonoBehaviour
 
     public void UpdateStatsPanel()
     {
+        if (playerCombat == null || playerStats == null)
+        {
+            FindPlayerReferences();
+        }
+        else
+        {
+            GameObject player = GameObject.FindGameObjectWithTag("Player");
+            if (player != null)
+            {
+                PlayerController pc = player.GetComponent<PlayerController>();
+                if (pc != null && playerStats != pc.stats)
+                {
+                    playerStats = pc.stats;
+                }
+            }
+        }
+
         if (playerStats != null)
         {
-            if (statsLevelText != null) statsLevelText.text = $"Cấp: {playerStats.currentTier} ({playerStats.tierName})";
+            if (statsLevelText != null) statsLevelText.text = $"Cấp độ: Tier {playerStats.currentTier} ({playerStats.tierName})";
             if (statsDamageText != null) statsDamageText.text = $"Sát thương: {playerStats.EffectiveAttackDamage}";
             if (statsDefenseText != null) statsDefenseText.text = $"Phòng thủ: {playerStats.EffectiveDefense}";
             if (statsHpText != null)

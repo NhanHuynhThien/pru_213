@@ -215,9 +215,9 @@ public class BlacksmithUI : MonoBehaviour
         // 3. Tab Rèn Giáp Trụ (Nâng Cấp Tier)
         _armorRecipes.Add(new Recipe
         {
-            name = "Giáp Đồng Đông Sơn (T2)",
+            name = "Giáp Đồng",
             desc = "Nâng cấp lên Giáp Đồng. Tăng vĩnh viễn HP tối đa và sức chống chịu.",
-            resultText = "Nâng cấp Giáp Tier 2",
+            resultText = "Nâng cấp Giáp Đồng",
             copperCost = 0,
             tinCost = 0,
             ingotCost = 5,
@@ -228,9 +228,9 @@ public class BlacksmithUI : MonoBehaviour
 
         _armorRecipes.Add(new Recipe
         {
-            name = "Giáp Mai Linh Quy (T3)",
+            name = "Giáp Linh Quy",
             desc = "Giáp kết hợp từ thỏi đồng thau và mai rùa thần. Tăng mạnh HP và Phòng thủ.",
-            resultText = "Nâng cấp Giáp Tier 3",
+            resultText = "Nâng cấp Giáp Linh Quy",
             copperCost = 0,
             tinCost = 0,
             ingotCost = 10,
@@ -241,9 +241,9 @@ public class BlacksmithUI : MonoBehaviour
 
         _armorRecipes.Add(new Recipe
         {
-            name = "Đế Giáp Thần Vương (T4)",
+            name = "Thần Vương",
             desc = "Giáp tối thượng được chúc phúc bởi thần khí và Đá Linh Lực cổ xưa.",
-            resultText = "Nâng cấp Giáp Tier 4",
+            resultText = "Nâng cấp Thần Vương",
             copperCost = 0,
             tinCost = 0,
             ingotCost = 20,
@@ -280,7 +280,14 @@ public class BlacksmithUI : MonoBehaviour
                 GameManager.Instance.AdvanceTier();
             }
 
-            DamagePopup.Create(_playerAnimator.transform.position + Vector3.up * 2f, $"Đã rèn: Giáp Tier {targetTier}!", Color.yellow);
+            string armorName = targetTier switch
+            {
+                2 => "Giáp Đồng",
+                3 => "Giáp Linh Quy",
+                4 => "Thần Vương",
+                _ => $"Giáp Tier {targetTier}"
+            };
+            UIManager.Instance?.ShowNotification($"🎉 Đã rèn: {armorName} (Tier {targetTier})!", 5f, new Color(0.2f, 1f, 0.2f));
         }
     }
 

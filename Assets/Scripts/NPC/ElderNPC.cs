@@ -86,8 +86,8 @@ public class ElderNPC : MonoBehaviour
             ParticleManager.Instance?.PlayUpgradeEffect(_playerTransform, 1);
             ParticleManager.Instance?.PlayConsecrationEffect(_playerTransform);
 
-            // Hiện chữ nổi
-            DamagePopup.Create(_playerTransform.position + Vector3.up * 2f, "Đã nhận: Giáp Chàm (Tier 1)!", Color.yellow);
+            // Gọi thông báo qua UIManager tập trung
+            UIManager.Instance?.ShowNotification("🎉 Đã nhận: Giáp Chàm (Tier 1)!", 5f, new Color(0.2f, 1f, 0.2f));
 
             Debug.Log("[Trưởng Lão] Đã trao Giáp Chàm Tier 1 thành công cho Player!");
         }

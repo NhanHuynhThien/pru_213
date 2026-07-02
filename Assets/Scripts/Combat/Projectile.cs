@@ -38,9 +38,11 @@ public class Projectile : MonoBehaviour
             _ => new ProjectileData { speed = 15f, gravity = 0f }
         };
 
-        GameObject obj = ObjectPool.Instance != null
-            ? ObjectPool.Instance.Spawn("Projectile", position, Quaternion.identity)
-            : new GameObject($"Projectile_{projType}");
+        GameObject obj = null;
+        if (ObjectPool.Instance != null)
+        {
+            obj = ObjectPool.Instance.Spawn("Projectile", position, Quaternion.identity);
+        }
 
         if (obj == null)
         {

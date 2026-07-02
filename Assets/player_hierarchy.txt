@@ -1,0 +1,227 @@
+Player GameObject Name: Player
+Active in Hierarchy: True
+Position: (7.59, 0.00, 1.56)
+Rotation: (0.00, 90.00, 0.00)
+Scale: (1.00, 1.00, 1.00)
+Components:
+  - Transform
+  - CharacterController
+  - PlayerMovement
+  - PlayerController
+  - Rigidbody
+
+Children:
+  - Main Camera (Active: True)
+    Position: (20.63, -2.59, 1.75)
+    Components:
+      * Transform
+      * Camera
+      * AudioListener
+      * UniversalAdditionalCameraData
+      * CameraController
+  - tripo_convert_11638484-23fb-49f2-8a94-1221be6259d6 (Active: True)
+    Position: (0.00, -4.97, 0.00)
+    Components:
+      * Transform
+      * Animator
+      * SkinManager
+    - Root (Active: True)
+      Position: (-0.01, -0.03, 0.02)
+      Components:
+        * Transform
+      - Hip (Active: True)
+        Position: (0.00, 0.00, 0.49)
+        Components:
+          * Transform
+        - Pelvis (Active: True)
+          Position: (0.00, 0.00, 0.00)
+          Components:
+            * Transform
+          - L_Thigh (Active: True)
+            Position: (0.06, 0.00, 0.00)
+            Components:
+              * Transform
+            - L_Calf (Active: True)
+              Position: (0.00, 0.28, 0.00)
+              Components:
+                * Transform
+              - L_CalfTwist01 (Active: True)
+                Position: (0.00, 0.00, 0.00)
+                Components:
+                  * Transform
+                - L_CalfTwist02 (Active: True)
+                  Position: (0.00, 0.09, 0.00)
+                  Components:
+                    * Transform
+              - L_Foot (Active: True)
+                Position: (0.00, 0.21, 0.00)
+                Components:
+                  * Transform
+                - L_ToeBase (Active: True)
+                  Position: (0.00, 0.03, 0.00)
+                  Components:
+                    * Transform
+            - L_ThighTwist01 (Active: True)
+              Position: (0.00, 0.00, 0.00)
+              Components:
+                * Transform
+              - L_ThighTwist02 (Active: True)
+                Position: (0.00, 0.14, 0.00)
+                Components:
+                  * Transform
+          - R_Thigh (Active: True)
+            Position: (-0.06, 0.00, 0.00)
+            Components:
+              * Transform
+            - R_Calf (Active: True)
+              Position: (0.00, 0.28, 0.00)
+              Components:
+                * Transform
+              - R_CalfTwist01 (Active: True)
+                Position: (0.00, 0.00, 0.00)
+                Components:
+                  * Transform
+                - R_CalfTwist02 (Active: True)
+                  Position: (0.00, 0.08, 0.00)
+                  Components:
+                    * Transform
+              - R_Foot (Active: True)
+                Position: (0.00, 0.20, 0.00)
+                Components:
+                  * Transform
+                - R_ToeBase (Active: True)
+                  Position: (0.00, 0.03, 0.00)
+                  Components:
+                    * Transform
+            - R_ThighTwist01 (Active: True)
+              Position: (0.00, 0.00, 0.00)
+              Components:
+                * Transform
+              - R_ThighTwist02 (Active: True)
+                Position: (0.00, 0.14, 0.00)
+                Components:
+                  * Transform
+        - Waist (Active: True)
+          Position: (0.00, 0.00, 0.00)
+          Components:
+            * Transform
+          - Spine01 (Active: True)
+            Position: (0.00, 0.05, 0.00)
+            Components:
+              * Transform
+            - Spine02 (Active: True)
+              Position: (0.00, 0.11, 0.00)
+              Components:
+                * Transform
+              - L_Clavicle (Active: True)
+                Position: (0.02, 0.09, 0.00)
+                Components:
+                  * Transform
+                - L_Upperarm (Active: True)
+                  Position: (0.00, 0.09, 0.00)
+                  Components:
+                    * Transform
+                  - L_Forearm (Active: True)
+                    Position: (0.00, 0.16, 0.00)
+                    Components:
+                      * Transform
+                    - L_ForearmTwist01 (Active: True)
+                      Position: (0.00, 0.00, 0.00)
+                      Components:
+                        * Transform
+                      - L_ForearmTwist02 (Active: True)
+                        Position: (0.00, 0.07, 0.00)
+                        Components:
+                          * Transform
+                    - L_Hand (Active: True)
+                      Position: (0.00, 0.14, 0.00)
+                      Components:
+                        * Transform
+                  - L_UpperarmTwist01 (Active: True)
+                    Position: (0.00, 0.00, 0.00)
+                    Components:
+                      * Transform
+                    - L_UpperarmTwist02 (Active: True)
+                      Position: (0.00, 0.08, 0.00)
+                      Components:
+                        * Transform
+              - NeckTwist01 (Active: True)
+                Position: (0.00, 0.09, 0.00)
+                Components:
+                  * Transform
+                - NeckTwist02 (Active: True)
+                  Position: (0.00, 0.03, 0.00)
+                  Components:
+                    * Transform
+                  - Head (Active: True)
+                    Position: (0.00, 0.01, 0.00)
+                    Components:
+                      * Transform
+              - R_Clavicle (Active: True)
+                Position: (-0.02, 0.09, 0.00)
+                Components:
+                  * Transform
+                - R_Upperarm (Active: True)
+                  Position: (0.00, 0.09, 0.00)
+                  Components:
+                    * Transform
+                  - R_Forearm (Active: True)
+                    Position: (0.00, 0.15, 0.00)
+                    Components:
+                      * Transform
+                    - R_ForearmTwist01 (Active: True)
+                      Position: (0.00, 0.00, 0.00)
+                      Components:
+                        * Transform
+                      - R_ForearmTwist02 (Active: True)
+                        Position: (0.00, 0.07, 0.00)
+                        Components:
+                          * Transform
+                    - R_Hand (Active: True)
+                      Position: (0.00, 0.14, 0.00)
+                      Components:
+                        * Transform
+                      - stylized_wooden_sword(Clone) (Active: True)
+                        Position: (0.03, 0.10, 0.06)
+                        Components:
+                          * Transform
+                          * Animator
+                        - Sketchfab_model (Active: True)
+                          Position: (0.00, 0.00, 0.00)
+                          Components:
+                            * Transform
+                          - root (Active: True)
+                            Position: (0.00, 0.00, 0.00)
+                            Components:
+                              * Transform
+                            - GLTF_SceneRootNode (Active: True)
+                              Position: (0.00, 0.00, 0.00)
+                              Components:
+                                * Transform
+                              - Wooden-Sword LP_0 (Active: True)
+                                Position: (-0.15, 0.14, -0.14)
+                                Components:
+                                  * Transform
+                                - Object_4 (Active: True)
+                                  Position: (0.00, 0.00, 0.00)
+                                  Components:
+                                    * Transform
+                                    * MeshFilter
+                                    * MeshRenderer
+                  - R_UpperarmTwist01 (Active: True)
+                    Position: (0.00, 0.00, 0.00)
+                    Components:
+                      * Transform
+                    - R_UpperarmTwist02 (Active: True)
+                      Position: (0.00, 0.08, 0.00)
+                      Components:
+                        * Transform
+    - tripo_node_11638484 (Active: True)
+      Position: (0.00, 0.00, 0.00)
+      Components:
+        * Transform
+        * SkinnedMeshRenderer
+    - CharacterRoot (Active: True)
+      Position: (0.00, 0.00, 0.00)
+      Components:
+        * Transform
