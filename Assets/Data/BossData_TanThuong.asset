@@ -15,21 +15,21 @@ MonoBehaviour:
   bossName: Trung Uy U Minh
   bossID: 1
   requiredTier: 1
-  maxHealth: 500
-  moveSpeed: 2.5
-  attackDamage: 25
+  maxHealth: 420
+  moveSpeed: 2.8
+  attackDamage: 18
   attackRange: 3
   attackCooldown: 2
-  defense: 10
+  defense: 6
   totalPhases: 2
   phaseHealthThresholds:
   - 0.5
-  specialAbilityCooldown: 8
-  dashSpeed: 12
-  aoeRadius: 5
-  aoeDamage: 40
+  specialAbilityCooldown: 10
+  dashSpeed: 8
+  aoeRadius: 4
+  aoeDamage: 26
   loreDescription: Trung Uy U Minh, cai dac biet dau tien cua long dat.
-  bossQuote: "Kneel before the darkness!"
+  bossQuote: Kneel before the darkness!
   modelPrefab: {fileID: 0}
   phaseTransitionEffect: {fileID: 0}
   deathEffect: {fileID: 0}

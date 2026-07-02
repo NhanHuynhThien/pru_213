@@ -15,20 +15,20 @@ MonoBehaviour:
   enemyName: U Minh Binh
   enemyID: 1
   type: 0
-  maxHealth: 50
-  moveSpeed: 3
-  attackDamage: 10
-  attackRange: 1.5
-  attackCooldown: 1.5
-  sightRange: 8
-  chaseRange: 12
-  defense: 2
+  maxHealth: 120
+  moveSpeed: 3.2
+  attackDamage: 12
+  attackRange: 2.1
+  attackCooldown: 1.4
+  sightRange: 14
+  chaseRange: 22
+  defense: 1
   tier1Multiplier: 1
-  tier2Multiplier: 1.5
-  tier3Multiplier: 2
-  tier4Multiplier: 3
-  copperReward: 5
-  expReward: 10
+  tier2Multiplier: 1.35
+  tier3Multiplier: 1.8
+  tier4Multiplier: 2.5
+  copperReward: 6
+  expReward: 12
   spawnWeight: 1
-  modelPrefab: {fileID: 0}
+  modelPrefab: {fileID: 100001, guid: 5e9d3a1dd836d7347a5b4f29d8b09285, type: 3}
   deathEffect: {fileID: 0}

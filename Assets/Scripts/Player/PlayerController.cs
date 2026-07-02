@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 [RequireComponent(typeof(CharacterController))]
 public class PlayerController : MonoBehaviour
@@ -24,8 +25,8 @@ public class PlayerController : MonoBehaviour
 
     [Header("Combat Settings")]
     public Transform attackPoint;
-    public float attackRange = 2f;
-    public float attackRadius = 1f;
+    public float attackRange = 2.7f;
+    public float attackRadius = 1.6f;
 
     private Vector3 velocity;
     private Vector3 moveDirection;
@@ -86,16 +87,15 @@ public class PlayerController : MonoBehaviour
                             (UIManager.Instance.victoryPanel != null && UIManager.Instance.victoryPanel.activeSelf) ||
                             (UIManager.Instance.characterStatsPanel != null && UIManager.Instance.characterStatsPanel.activeSelf)
                         ));
-        bool isCursorUnlocked = Cursor.lockState != CursorLockMode.Locked;
-        bool blockInput = isUIOpen || isCursorUnlocked || wasUIOpenLastFrame;
-        wasUIOpenLastFrame = isUIOpen || isCursorUnlocked;
+        bool blockInput = isUIOpen || wasUIOpenLastFrame;
+        wasUIOpenLastFrame = isUIOpen;
 
         if (isAttacking && attackTimer <= 0f)
         {
             isAttacking = false;
         }
 
-        if (!blockInput && Input.GetKeyDown(KeyCode.F) && !isAttacking && attackTimer <= 0f)
+        if (!blockInput && (Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.F)) && !isAttacking && attackTimer <= 0f)
         {
             Attack();
         }
@@ -227,11 +227,11 @@ public class PlayerController : MonoBehaviour
                             (UIManager.Instance.victoryPanel != null && UIManager.Instance.victoryPanel.activeSelf) ||
                             (UIManager.Instance.characterStatsPanel != null && UIManager.Instance.characterStatsPanel.activeSelf)
                         ));
-        bool isCursorUnlocked = Cursor.lockState != CursorLockMode.Locked;
-        bool blockInput = isUIOpen || isCursorUnlocked || wasUIOpenLastFrame;
+        bool blockInput = isUIOpen || wasUIOpenLastFrame;
 
-        float h = blockInput ? 0f : Input.GetAxisRaw("Horizontal");
-        float v = blockInput ? 0f : Input.GetAxisRaw("Vertical");
+        Vector2 input = blockInput ? Vector2.zero : ReadMovementInput();
+        float h = input.x;
+        float v = input.y;
         IsMoving = Mathf.Abs(h) > 0.1f || Mathf.Abs(v) > 0.1f;
 
         float speed = (isSprinting && !blockInput) ? sprintSpeed : walkSpeed;
@@ -274,6 +274,27 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    private Vector2 ReadMovementInput()
+    {
+        float h = Input.GetAxisRaw("Horizontal");
+        float v = Input.GetAxisRaw("Vertical");
+
+        if (Mathf.Abs(h) < 0.01f)
+        {
+            if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow)) h = -1f;
+            if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow)) h = 1f;
+        }
+
+        if (Mathf.Abs(v) < 0.01f)
+        {
+            if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow)) v = -1f;
+            if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow)) v = 1f;
+        }
+
+        Vector2 input = new Vector2(h, v);
+        return input.sqrMagnitude > 1f ? input.normalized : input;
+    }
+
     void HandleJump()
     {
         if (!isGrounded)
@@ -303,19 +324,23 @@ public class PlayerController : MonoBehaviour
             Vector3 attackPos = transform.position + transform.forward * (attackRange * 0.5f) + Vector3.up * 1f;
 
             Collider[] hits = Physics.OverlapSphere(attackPos, attackRadius);
+            HashSet<IDamageable> damagedTargets = new HashSet<IDamageable>();
             foreach (Collider hit in hits)
             {
                 // Bỏ qua chính bản thân người chơi
-                if (hit.gameObject == gameObject) continue;
+                if (hit.transform == transform || hit.transform.IsChildOf(transform)) continue;
 
                 IDamageable dmg = hit.GetComponentInParent<IDamageable>();
                 if (dmg != null)
                 {
+                    if (damagedTargets.Contains(dmg)) continue;
+
                     float dmgVal = stats.EffectiveAttackDamage;
                     bool isCrit = Random.value < stats.criticalChance;
                     if (isCrit) dmgVal *= stats.criticalMultiplier;
 
                     dmg.TakeDamage(Mathf.RoundToInt(dmgVal), isCrit);
+                    damagedTargets.Add(dmg);
 
                     if (isCrit)
                     {
@@ -324,8 +349,50 @@ public class PlayerController : MonoBehaviour
                 }
             }
 
+            foreach (EnemyController enemy in FindObjectsByType<EnemyController>(FindObjectsSortMode.None))
+            {
+                if (enemy != null && IsTargetInsideAttackCone(enemy.transform) && !damagedTargets.Contains(enemy))
+                {
+                    DamageKnownTarget(enemy, enemy.name, damagedTargets);
+                }
+            }
+
+            foreach (BossController boss in FindObjectsByType<BossController>(FindObjectsSortMode.None))
+            {
+                if (boss != null && IsTargetInsideAttackCone(boss.transform) && !damagedTargets.Contains(boss))
+                {
+                    DamageKnownTarget(boss, boss.name, damagedTargets);
+                }
+            }
+
             StartCoroutine(AttackAnimation());
         }
+    }
+
+    private bool IsTargetInsideAttackCone(Transform target)
+    {
+        if (target == null || target == transform || target.IsChildOf(transform)) return false;
+
+        Vector3 toTarget = target.position - transform.position;
+        toTarget.y = 0f;
+        if (toTarget.sqrMagnitude > attackRange * attackRange) return false;
+        if (toTarget.sqrMagnitude < 0.05f) return true;
+
+        return Vector3.Angle(transform.forward, toTarget.normalized) <= 100f;
+    }
+
+    private void DamageKnownTarget(IDamageable target, string targetName, HashSet<IDamageable> damagedTargets)
+    {
+        if (target == null || damagedTargets.Contains(target) || stats == null) return;
+
+        float dmgVal = stats.EffectiveAttackDamage;
+        bool isCrit = Random.value < stats.criticalChance;
+        if (isCrit) dmgVal *= stats.criticalMultiplier;
+
+        target.TakeDamage(Mathf.RoundToInt(dmgVal), isCrit);
+        damagedTargets.Add(target);
+
+        Debug.Log($"[PlayerController] Chem trung {targetName}, gay {dmgVal} damage.");
     }
 
     System.Collections.IEnumerator AttackAnimation()

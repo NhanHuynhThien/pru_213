@@ -16,13 +16,13 @@ MonoBehaviour:
   playerID: 0
   currentTier: 1
   tierName: Gap Cham
-  className: Nghệ Nhân
-  maxHealth: 100
-  currentHealth: 100
+  className: "Ngh\u1EC7 Nh\xE2n"
+  maxHealth: 120
+  currentHealth: 120
   moveSpeed: 5
   sprintSpeed: 8
   jumpForce: 8
-  attackDamage: 15
+  attackDamage: 24
   attackSpeed: 1
   criticalChance: 0.05
   criticalMultiplier: 1.5
@@ -30,10 +30,11 @@ MonoBehaviour:
   stamina: 100
   maxStamina: 100
   staminaRegen: 10
-  copperCount: 0
+  copperCount: 53
   tinCount: 0
   bronzeIngot: 0
   turtleShell: 0
+  spiritualStone: 0
   tierHealthBonus: 0
   tierDamageBonus: 0
   tierDefenseBonus: 0
