@@ -13,7 +13,10 @@ public class SkinManager : MonoBehaviour
 
     void Start()
     {
-        ApplySkinByTier(currentTier);
+        if (currentTier > 0)
+        {
+            ApplySkinByTier(currentTier);
+        }
     }
 
     public void ApplySkinByTier(int tier)
@@ -23,9 +26,26 @@ public class SkinManager : MonoBehaviour
 
         SkinBase skinData = availableSkins?.Find(s => s.Tier == tier);
 
-        if (_currentModel != null)
+        // Xóa sạch tất cả các mô hình con đang có dưới characterRoot (bao gồm cả mô hình mặc định kéo sẵn)
+        if (characterRoot != null)
         {
-            Destroy(_currentModel);
+            foreach (Transform child in characterRoot)
+            {
+                Destroy(child.gameObject);
+            }
+        }
+
+        // Tự động tìm và xóa các mô hình mặc định cũ (Root và Mesh) nằm ngoài characterRoot để tránh bị đè 2 nhân vật
+        foreach (Transform child in transform)
+        {
+            if (child != characterRoot)
+            {
+                string nameLower = child.name.ToLower();
+                if (nameLower == "root" || nameLower.Contains("node") || nameLower.Contains("mesh") || child.GetComponent<Renderer>() != null || child.GetComponent<SkinnedMeshRenderer>() != null)
+                {
+                    Destroy(child.gameObject);
+                }
+            }
         }
 
         if (skinData?.ModelPrefab != null)
@@ -43,6 +63,20 @@ public class SkinManager : MonoBehaviour
             if (skinData.equipEffect != null)
             {
                 Instantiate(skinData.equipEffect, characterRoot.position, Quaternion.identity);
+            }
+
+            // Cập nhật lại các tham chiếu Animator của người chơi
+            Animator newAnimator = _currentModel.GetComponentInChildren<Animator>();
+            if (newAnimator != null)
+            {
+                PlayerController pc = GetComponent<PlayerController>();
+                if (pc != null) pc.animator = newAnimator;
+
+                PlayerCombat combat = GetComponent<PlayerCombat>();
+                if (combat != null) combat.animator = newAnimator;
+
+                PlayerMovement pm = GetComponent<PlayerMovement>();
+                if (pm != null) pm.SetAnimator(newAnimator);
             }
 
             Debug.Log($"[SkinManager] Đã trang bị: Tier {tier} - {skinData.SkinName}");

@@ -265,6 +265,7 @@ public class BlacksmithUI : MonoBehaviour
             {
                 us.skinManager.currentTier = targetTier;
                 us.skinManager.ApplySkinByTier(targetTier);
+                SetupReferences(); // Cập nhật lại các tham chiếu bao gồm _playerAnimator mới
             }
 
             ParticleManager.Instance?.PlayUpgradeEffect(_playerAnimator.transform, targetTier);
